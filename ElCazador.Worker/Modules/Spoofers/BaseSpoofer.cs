@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -29,7 +29,7 @@ namespace ElCazador.Worker.Modules.Spoofers
         {
             var ip = ((IPEndPoint)SocketType.IPEndPoint).Address;
 
-            if (Program.IP.Equals(ip) || !CheckRules(state))
+            if (Worker.IP.Equals(ip) || !CheckRules(state))
             {
                 return;
             }
@@ -47,7 +47,7 @@ namespace ElCazador.Worker.Modules.Spoofers
             var name = GetName(state);
             
             // We have to write everything as once as this is threaded
-            Program.Write("{0}Received {1} request for {2} from {3}{4}",
+            Worker.Write("{0}Received {1} request for {2} from {3}{4}",
                  Environment.NewLine,
                  Protocol,
                  name,
@@ -58,17 +58,23 @@ namespace ElCazador.Worker.Modules.Spoofers
         public async Task SpoofPacket(SpooferPacket state)
         {
             var data = state.Buffer;
-            var ip = Program.IP.GetAddressBytes();
+            var ip = Worker.IP.GetAddressBytes();
 
             var packet = GetPacket(data, ip).Build();
 
             try
             {
-                await SocketType.Socket.SendToAsync(packet, SocketFlags.None, SocketType.IPEndPoint);
+                SocketAsyncEventArgs e = new SocketAsyncEventArgs();
+                e.RemoteEndPoint = SocketType.IPEndPoint;
+                e.SetBuffer(packet, 0, packet.Length);
+                e.SocketFlags = SocketFlags.None;
+
+
+                SocketType.Socket.SendToAsync(e);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Program.Write("{0} Could not send response", Environment.NewLine);
+                Worker.Write("{0} Could not send response", Environment.NewLine);
             }
         }
     }

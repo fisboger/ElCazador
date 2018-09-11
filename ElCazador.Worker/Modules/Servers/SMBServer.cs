@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -26,7 +26,7 @@ namespace ElCazador.Worker.Modules.Servers
         {
             // Data buffer for incoming data.  
             byte[] bytes = new Byte[1024];
-            IPEndPoint localEndPoint = new IPEndPoint(Program.IP, 445);
+            IPEndPoint localEndPoint = new IPEndPoint(Worker.IP, 445);
 
             // Create a TCP/IP socket.  
             Socket listener = new Socket(localEndPoint.Address.AddressFamily,
@@ -163,7 +163,7 @@ namespace ElCazador.Worker.Modules.Servers
             short userOffset = BitConverter.ToInt16(auth, 40);
             string user = Encoding.Unicode.GetString(auth.Skip(userOffset).Take(userLen).ToArray());
 
-            Program.AddHash(new Hash
+            Worker.AddHash(new Hash
             {
                 IPAddress = (packet.Socket.RemoteEndPoint as IPEndPoint).Address,
                 User = user,

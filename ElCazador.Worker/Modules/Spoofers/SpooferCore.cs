@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -108,7 +108,7 @@ namespace ElCazador.Worker.Modules.Spoofers
                 StartSocket(socketType);
             }
 
-            Program.WriteLine("Spoofer module started");
+            Worker.WriteLine("Spoofer module started");
 
             while (true)
             {
@@ -155,7 +155,7 @@ namespace ElCazador.Worker.Modules.Spoofers
             }
             else
             {
-                Program.WriteLine("Couldn't read packet({0}). Dumping Hex {1}{2}",
+                Worker.WriteLine("Couldn't read packet({0}). Dumping Hex {1}{2}",
                     length,
                     Environment.NewLine,
                     ElCazador.Worker.Utils.Hex.Dump(state.Buffer));

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -125,7 +125,7 @@ namespace ElCazador.Worker.Modules.Servers
                     short hostNameOffset = BitConverter.ToInt16(auth, 48);
                     string hostName = Encoding.Unicode.GetString(auth.Skip(hostNameOffset).Take(hostNameLen).ToArray());
 
-                    Program.AddHash(new Hash {
+                    Worker.AddHash(new Hash {
                         IPAddress =  context.Request.RemoteEndPoint.Address,
                         User = user,
                         Domain = domain,
@@ -136,7 +136,7 @@ namespace ElCazador.Worker.Modules.Servers
                 }
                 else
                 {
-                    Program.WriteLine("Unknown packet type {0}", packetType.ToString());
+                    Worker.WriteLine("Unknown packet type {0}", packetType.ToString());
                 }
             }
         }
