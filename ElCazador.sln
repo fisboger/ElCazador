@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElCazador.Worker", "ElCazador.Worker\ElCazador.Worker.csproj", "{402F466D-2B1B-4DA3-8FA4-94FA6A45A63C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElCazador.Web", "ElCazador.Web\ElCazador.Web.csproj", "{E9D89066-BF7E-412D-8F81-2FADD3FA949D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,17 @@ Global
 		{402F466D-2B1B-4DA3-8FA4-94FA6A45A63C}.Release|x64.Build.0 = Release|Any CPU
 		{402F466D-2B1B-4DA3-8FA4-94FA6A45A63C}.Release|x86.ActiveCfg = Release|Any CPU
 		{402F466D-2B1B-4DA3-8FA4-94FA6A45A63C}.Release|x86.Build.0 = Release|Any CPU
+		{E9D89066-BF7E-412D-8F81-2FADD3FA949D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9D89066-BF7E-412D-8F81-2FADD3FA949D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9D89066-BF7E-412D-8F81-2FADD3FA949D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E9D89066-BF7E-412D-8F81-2FADD3FA949D}.Debug|x64.Build.0 = Debug|Any CPU
+		{E9D89066-BF7E-412D-8F81-2FADD3FA949D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E9D89066-BF7E-412D-8F81-2FADD3FA949D}.Debug|x86.Build.0 = Debug|Any CPU
+		{E9D89066-BF7E-412D-8F81-2FADD3FA949D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9D89066-BF7E-412D-8F81-2FADD3FA949D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9D89066-BF7E-412D-8F81-2FADD3FA949D}.Release|x64.ActiveCfg = Release|Any CPU
+		{E9D89066-BF7E-412D-8F81-2FADD3FA949D}.Release|x64.Build.0 = Release|Any CPU
+		{E9D89066-BF7E-412D-8F81-2FADD3FA949D}.Release|x86.ActiveCfg = Release|Any CPU
+		{E9D89066-BF7E-412D-8F81-2FADD3FA949D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
