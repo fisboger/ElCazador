@@ -1,0 +1,108 @@
+<template>
+  <div>
+    <el-dialog title="Add target" :visible.sync="targetDialogVisible" width="20%">
+      <el-form :model="form">
+        <el-form-item label="Host" :label-width="formLabelWidth">
+          <el-input v-model="form.hostname" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="IP" :label-width="formLabelWidth">
+          <el-input v-model="form.ip" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="abort()">Cancel</el-button>
+        <el-button type="primary" @click="(targetDialogAction == 'ADD') ? add() : edit()">Confirm</el-button>
+      </span>
+    </el-dialog>
+
+    <el-col :span="12" class="spaced-col">
+      <el-card class="box-card">
+        <div slot="header" class="clearfix">
+          <span>Targets</span>
+          <el-button style="float: right;" @click="targetDialogVisible = true" type="primary" icon="el-icon-plus" size="mini" circle></el-button>
+        </div>
+        <template>
+          <el-table v-loading="currentTargets.isLoading" :data="currentTargets.data" style="min-height:200px" max-height="200">
+            <el-table-column sortable prop="hostname" label="Host">
+            </el-table-column>
+            <el-table-column sortable prop="ip" label="IP" min-width="100">
+            </el-table-column>
+            <el-table-column sortable prop="dumped" label="Dumped">
+              <template slot-scope="scope">
+                <i v-if="scope.row.dumped" class="el-icon-check"></i>
+                <i v-else class="el-icon-close success"></i>
+              </template>
+            </el-table-column>
+            <el-table-column fixed="right" align="right" min-width="40">
+              <template slot-scope="scope">
+                <el-button @click="prepareEdit(scope.$index)" class="zero-padding" type="text" icon="el-icon-edit" circle></el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </template>
+      </el-card>
+    </el-col>
+  </div>
+</template>
+
+<script>
+import { mapActions, mapState, mapMutations } from "vuex";
+
+const EDIT = 'EDIT'
+const ADD = 'ADD'
+
+export default {
+  data: function() {
+    return {
+      targetDialogVisible: false,
+      targetDialogAction: ADD,
+      form: {},
+      formLabelWidth: "120px"
+    };
+  },
+  computed: {
+    ...mapState({
+      currentTargets: state => state.targets
+    })
+  },
+  methods: {
+    add: function(event) {
+      this.$store.commit("ADD_TARGET", {
+        id: "",
+        timestamp: new Date().getTime(),
+        hostname: this.form.hostname,
+        ip: this.form.ip,
+        dumped: false
+      });
+
+      this.abort();
+    },
+    edit: function(event) {
+      this.$store.commit("EDIT_TARGET", this.form);
+      this.form = {};
+
+      this.abort();
+    },
+    prepareEdit: function(index) {
+      var element = this.currentTargets.data[index];
+      this.form = {
+        id: element.id,
+        hostname: element.hostname,
+        ip: element.ip,
+        timestamp: element.timestamp,
+        dumped: element.dumped
+      }
+      this.targetDialogAction = EDIT;
+      this.targetDialogVisible = true;
+    },
+    abort: function() {
+      this.targetDialogAction = ADD;
+      this.form = {};
+      this.targetDialogVisible = false;
+    }
+  }
+};
+</script>
+
+<style>
+</style>

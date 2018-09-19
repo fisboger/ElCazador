@@ -17,40 +17,40 @@
 </template>
 
 <script>
-  import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from "vuex";
 
-  export default {
+export default {
   data() {
-  return {
-  autoCount: 0,
-  }
+    return {
+      autoCount: 0
+    };
   },
 
   computed: {
-  ...mapState({
-  currentCount: state => state.counter
-  })
+    ...mapState({
+      currentCount: state => state.counter
+    })
   },
 
   methods: {
-  ...mapActions(['setCounter']),
+    ...mapActions(["setCounter"]),
 
-  incrementCounter: function() {
-  var counter = this.currentCount + 1;
-  this.setCounter({counter: counter});
-  },
-  resetCounter: function() {
-  this.setCounter({counter: 0});
-  this.autoCount = 0;
-  }
+    incrementCounter: function() {
+      var counter = this.currentCount + 1;
+      this.setCounter({ counter: counter });
+    },
+    resetCounter: function() {
+      this.setCounter({ counter: 0 });
+      this.autoCount = 0;
+    }
   },
 
   created() {
-  setInterval(() => {
-  this.autoCount += 1
-  }, 1000)
+    setInterval(() => {
+      this.autoCount += 1;
+    }, 1000);
   }
-  }
+};
 </script>
 
 <style>

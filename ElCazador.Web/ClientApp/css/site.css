@@ -30,7 +30,7 @@
     /* On small screens, convert the nav menu to a vertical sidebar */
     .main-nav {
         height: 100%;
-        width: calc(25% - 20px);
+        width: calc(16.66667%);
     }
     .main-nav .navbar {
         border-radius: 0px;
@@ -63,4 +63,37 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
+}
+
+/* Element override */
+.el-table td,
+.el-table th {
+  padding: 0 !important;
+}
+
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+}
+
+.clearfix:after {
+  clear: both
+}
+
+.el-main {
+  padding: 0 10px;
+}
+
+.el-col {
+  padding-left: 10px;
+  padding-bottom: 10px;
+}
+
+.el-card__header {
+    font-size: 16px;
+}
+
+.zero-padding {
+    padding:0 !important;
 }
