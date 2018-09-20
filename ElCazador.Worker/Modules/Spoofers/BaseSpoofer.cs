@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using ElCazador.Worker.Interfaces;
 using ElCazador.Worker.Models;
 using ElCazador.Worker.Modules.Spoofers.Models;
 
@@ -12,13 +13,15 @@ namespace ElCazador.Worker.Modules.Spoofers
 
         protected SpooferSettings Settings { get; set; }
         protected Models.SocketType SocketType { get; set; }
+        protected IWorkerController Controller { get; private set; }
 
         protected abstract string Protocol { get; }
 
-        internal BaseSpoofer(SpooferSettings settings, Models.SocketType socketType)
+        internal BaseSpoofer(IWorkerController controller, SpooferSettings settings, Models.SocketType socketType)
         {
             Settings = settings;
             SocketType = socketType;
+            Controller = controller;
         }
 
         protected abstract bool CheckRules(SpooferPacket state);
@@ -29,7 +32,7 @@ namespace ElCazador.Worker.Modules.Spoofers
         {
             var ip = ((IPEndPoint)SocketType.IPEndPoint).Address;
 
-            if (Worker.IP.Equals(ip) || !CheckRules(state))
+            if (Controller.WorkerSettings.IP.Equals(ip) || !CheckRules(state))
             {
                 return;
             }
@@ -47,7 +50,7 @@ namespace ElCazador.Worker.Modules.Spoofers
             var name = GetName(state);
             
             // We have to write everything as once as this is threaded
-            Worker.Write("{0}Received {1} request for {2} from {3}{4}",
+            await Controller.Log(Protocol, "{0}Received {1} request for {2} from {3}{4}",
                  Environment.NewLine,
                  Protocol,
                  name,
@@ -58,7 +61,7 @@ namespace ElCazador.Worker.Modules.Spoofers
         public async Task SpoofPacket(SpooferPacket state)
         {
             var data = state.Buffer;
-            var ip = Worker.IP.GetAddressBytes();
+            var ip = Controller.WorkerSettings.IP.GetAddressBytes();
 
             var packet = GetPacket(data, ip).Build();
 
@@ -74,7 +77,7 @@ namespace ElCazador.Worker.Modules.Spoofers
             }
             catch (Exception)
             {
-                Worker.Write("{0} Could not send response", Environment.NewLine);
+                await Controller.Log(Protocol, "{0} Could not send response", Environment.NewLine);
             }
         }
     }

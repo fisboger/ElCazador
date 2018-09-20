@@ -7,12 +7,13 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ElCazador.Worker.Interfaces;
 using ElCazador.Worker.Modules;
 using ElCazador.Worker.Modules.Spoofers.Models;
 
 namespace ElCazador.Worker.Modules.Spoofers
 {
-    internal class SpooferCore : IModule
+    internal class SpooferCore : AbstractModule, IModule
     {
         private SpooferSettings Settings { get; set; }
 
@@ -32,24 +33,23 @@ namespace ElCazador.Worker.Modules.Spoofers
             MulticastAddress = IPAddress.Parse("224.0.0.252")
         };
         #endregion
-
         // TODO: This is dirty, maybe find a better way
         private IDictionary<Models.SocketType, List<ISpoofer>> Spoofers { get; set; } = new Dictionary<Models.SocketType, List<ISpoofer>>();
         private IList<Models.SocketType> SocketTypes { get; set; } = new List<Models.SocketType>();
 
         public bool IsEnabled => Settings.NBNS || Settings.LLMNR;
 
-        internal SpooferCore(SpooferSettings settings)
+        internal SpooferCore(IWorkerController controller, SpooferSettings settings) : base(controller, "SpooferCore")
         {
             Settings = settings;
 
-            //AddSpoofer(UDP137Socket, new NBNSSpoofer(Settings, UDP137Socket), Settings.NBNS);
-            AddSpoofer(UDP5355Socket, new LLMNRSpoofer(Settings, UDP5355Socket), Settings.LLMNR);
+            AddSpoofer(UDP137Socket, new NBNSSpoofer(Controller, Settings, UDP137Socket), Settings.NBNS);
+            AddSpoofer(UDP5355Socket, new LLMNRSpoofer(Controller, Settings, UDP5355Socket), Settings.LLMNR);
         }
 
-        public async void Run()
+        public async Task Run()
         {
-            StartSockets();
+            await StartSockets();
         }
 
         private void AddSpoofer(Models.SocketType socketType, ISpoofer spoofer, bool run)
@@ -70,7 +70,7 @@ namespace ElCazador.Worker.Modules.Spoofers
             socketRef.Add(spoofer);
         }
 
-        private void StartSocket(Models.SocketType socketType)
+        private async Task StartSocket(Models.SocketType socketType)
         {
             if (!Spoofers.ContainsKey(socketType))
             {
@@ -99,26 +99,28 @@ namespace ElCazador.Worker.Modules.Spoofers
             }
 
             socketType.Socket = result;
+
+            await Task.CompletedTask;
         }
 
-        private void StartSockets()
+        private async Task StartSockets()
         {
             foreach (var socketType in SocketTypes)
             {
-                StartSocket(socketType);
+                await StartSocket(socketType);
             }
 
-            Worker.WriteLine("Spoofer module started");
+            await Controller.Log(Name, "Spoofer module started");
 
             while (true)
             {
-                BeginReceiveSockets();
+                await BeginReceiveSockets();
 
                 Thread.Sleep(100);
             }
         }
 
-        private void BeginReceiveSockets()
+        private async Task BeginReceiveSockets()
         {
             foreach (var socketType in SocketTypes.Where(s => s.ProtocolType == ProtocolType.Udp))
             {
@@ -130,12 +132,14 @@ namespace ElCazador.Worker.Modules.Spoofers
                     SpooferPacket.BUFFER_SIZE,
                     SocketFlags.None,
                     ref socketType.IPEndPoint,
-                    new AsyncCallback((ar) => ReadCallback(ar, socketType)),
+                    new AsyncCallback(async (ar) => await ReadCallback(ar, socketType)),
                     state);
             }
+
+            await Task.CompletedTask;
         }
 
-        public async void ReadCallback(IAsyncResult result, Models.SocketType socketType)
+        public async Task ReadCallback(IAsyncResult result, Models.SocketType socketType)
         {
             // Retrieve the state object and the handler socket  
             // from the asynchronous state object.  
@@ -155,7 +159,7 @@ namespace ElCazador.Worker.Modules.Spoofers
             }
             else
             {
-                Worker.WriteLine("Couldn't read packet({0}). Dumping Hex {1}{2}",
+                await Controller.Log(Name, "Couldn't read packet({0}). Dumping Hex {1}{2}",
                     length,
                     Environment.NewLine,
                     ElCazador.Worker.Utils.Hex.Dump(state.Buffer));
@@ -170,7 +174,7 @@ namespace ElCazador.Worker.Modules.Spoofers
                 SpooferPacket.BUFFER_SIZE,
                 SocketFlags.None,
                 ref socketType.IPEndPoint,
-                new AsyncCallback((ar) => ReadCallback(ar, socketType)),
+                new AsyncCallback(async (ar) => await ReadCallback(ar, socketType)),
                 state);
         }
     }

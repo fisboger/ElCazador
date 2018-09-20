@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using ElCazador.Worker.Interfaces;
 using ElCazador.Worker.Models;
 using ElCazador.Worker.Modules.Spoofers.Models;
 
@@ -14,8 +15,8 @@ namespace ElCazador.Worker.Modules.Spoofers
 
         protected override string Protocol => "NBNS";
 
-        public NBNSSpoofer(SpooferSettings settings, Models.SocketType socketType)
-            : base(settings, socketType)
+        public NBNSSpoofer(IWorkerController controller, SpooferSettings settings, Models.SocketType socketType)
+            : base(controller, settings, socketType)
         {
         }
         protected override IPacket GetPacket(byte[] data, byte[] ip)

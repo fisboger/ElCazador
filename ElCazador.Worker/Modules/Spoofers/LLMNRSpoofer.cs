@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using ElCazador.Worker.Interfaces;
 using ElCazador.Worker.Models;
 using ElCazador.Worker.Modules.Spoofers.Models;
 using ElCazador.Worker.Utils;
@@ -16,8 +17,8 @@ namespace ElCazador.Worker.Modules.Spoofers
 
         protected override string Protocol { get => "LLMNR"; }
 
-        public LLMNRSpoofer(SpooferSettings settings, Models.SocketType socketType)
-            : base(settings, socketType)
+        public LLMNRSpoofer(IWorkerController controller, SpooferSettings settings, Models.SocketType socketType)
+            : base(controller, settings, socketType)
         {
         }
 
