@@ -48,8 +48,8 @@
 <script>
 import { mapActions, mapState, mapMutations } from "vuex";
 
-const EDIT = 'EDIT'
-const ADD = 'ADD'
+const EDIT = "EDIT";
+const ADD = "ADD";
 
 export default {
   data: function() {
@@ -65,15 +65,41 @@ export default {
       currentTargets: state => state.targets
     })
   },
+  created: function() {
+    console.log(this.$http);
+    this.connection = new this.$signalR.HubConnectionBuilder()
+      .withUrl("http://localhost:5000/TargetHub")
+      .configureLogging(this.$signalR.LogLevel.Error)
+      .build();
+  },
+  mounted: function() {
+    this.connection.start().catch(function(err) {
+      console.error(err);
+    });
+
+    this.connection.on("AddTarget", target => {
+      console.log(target);
+      this.$store.commit("ADD_TARGET", {
+        id: target.id,
+        timestamp: target.timestamp,
+        hostname: target.hostname,
+        ip: target.ip,
+        dumped: target.dumped
+      });
+    });
+  },
   methods: {
     add: function(event) {
-      this.$store.commit("ADD_TARGET", {
-        id: "",
-        timestamp: new Date().getTime(),
-        hostname: this.form.hostname,
-        ip: this.form.ip,
-        dumped: false
-      });
+
+      this.connection
+        .invoke("AddTarget", {
+          hostname: this.form.hostname,
+          ip: this.form.ip,
+          dumped: false
+        })
+        .catch(function(err) {
+          console.error(err);
+        });
 
       this.abort();
     },
@@ -91,7 +117,7 @@ export default {
         ip: element.ip,
         timestamp: element.timestamp,
         dumped: element.dumped
-      }
+      };
       this.targetDialogAction = EDIT;
       this.targetDialogVisible = true;
     },
@@ -99,7 +125,8 @@ export default {
       this.targetDialogAction = ADD;
       this.form = {};
       this.targetDialogVisible = false;
-    }
+    },
+    send: function() {}
   }
 };
 </script>
