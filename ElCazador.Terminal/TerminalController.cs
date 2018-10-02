@@ -24,17 +24,17 @@ namespace ElCazador.Terminal
             await Task.CompletedTask;
         }
 
-        public async Task Output(string name, Hash hash)
+        public async Task Output(string name, User user)
         {
             Console.WriteLine(
                     @"{0}Received NetNTLMv2 hash from {1}{0}{2}::{3}:{4}:{5}:{6}",
                     Environment.NewLine,
-                    hash.IPAddress.ToString(),
-                    hash.User,
-                    hash.Domain,
-                    hash.Challenge,
-                    String.Concat(hash.NetLMHash),
-                    string.Concat(hash.NetNTHash)
+                    user.IPAddress.ToString(),
+                    user.Username,
+                    user.Domain,
+                    user.Challenge,
+                    String.Concat(user.NetLMHash),
+                    string.Concat(user.NetNTHash)
                 );
 
             await Task.CompletedTask;

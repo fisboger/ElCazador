@@ -133,7 +133,7 @@ namespace ElCazador.Worker.Modules.Servers
                         handler.BeginReceive(state.Buffer, 0, SMBPacket.BUFFER_SIZE, 0,
                             new AsyncCallback(async (ar) => await ReadCallback(ar)), state);
                     }
-                    catch (ObjectDisposedException e)
+                    catch (ObjectDisposedException)
                     {
 
                     }

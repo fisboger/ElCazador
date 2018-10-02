@@ -7,9 +7,6 @@ namespace ElCazador.Test
     public class WorkerTest
     {
 
-        // Worker Worker;
-        Worker.Worker Worker;
-
         [Fact]
         public void TestOutput()
         {

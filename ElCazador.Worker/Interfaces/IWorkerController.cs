@@ -8,7 +8,7 @@ namespace ElCazador.Worker.Interfaces
         WorkerSettings WorkerSettings { get; }
         IDataStorage DataStorage { get; }
 
-        Task Output(string name, User hash);
+        Task Output(string name, User user);
         Task Log(string name, string value, params object[] args);
     }
 }

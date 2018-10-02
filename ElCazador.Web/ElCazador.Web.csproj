@@ -18,9 +18,6 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="1.0.1" />
-  </ItemGroup>
-  <ItemGroup>
     <None Remove="yarn.lock" />
     <Content Remove="ClientApp\**" />
   </ItemGroup>
