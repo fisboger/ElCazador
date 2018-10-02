@@ -1,6 +1,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using ElCazador.Web.Hubs;
+using ElCazador.Web.Hubs.Actions;
 using ElCazador.Worker.Interfaces;
 using ElCazador.Worker.Models;
 using Microsoft.AspNetCore.SignalR;
@@ -14,12 +15,16 @@ namespace ElCazador.Web.Worker
             IP = IPAddress.Parse("10.64.13.89")
         };
 
-        private IHubContext<TargetHub> TargetHubContext { get; set; }
+        private IHubAction<Target> TargetHubActions { get; set; }
+        private IHubAction<User> UserHubActions { get; set; }
 
 
-        public WebController(IHubContext<TargetHub> targetHubContext)
+        public WebController(
+            IHubAction<Target> targetHubActions,
+            IHubAction<User> userHubActions)
         {
-            TargetHubContext = targetHubContext;
+            TargetHubActions = targetHubActions;
+            UserHubActions = userHubActions;
         }
 
         public IDataStorage DataStorage => throw new System.NotImplementedException();
@@ -29,9 +34,14 @@ namespace ElCazador.Web.Worker
             await Task.CompletedTask;
         }
 
-        public async Task Output(string name, Hash hash)
+        public async Task Output(string name, User user) 
         {
-            await TargetHubContext.Clients.All.SendAsync("AddTarget", hash);
+            await UserHubActions.Add(user);
+        }
+
+        public async Task Output(string name, Target target) 
+        {
+            await TargetHubActions.Add(target);
         }
     }
 }

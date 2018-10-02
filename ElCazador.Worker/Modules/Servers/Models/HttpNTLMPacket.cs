@@ -55,7 +55,7 @@ namespace ElCazador.Worker.Modules.Servers.Models
         private byte[] TargetNameMaxLan { get; set; } = new byte[] { 0x06, 00 };
         private byte[] TargetNameOffset { get; set; } = new byte[] { 0x38, 0x00, 0x00, 0x00 };
         private byte[] NegoFlags { get; set; } = new byte[] { 0x05, 0x02, 0x89, 0xa2 };
-        private byte[] ServerChallenge { get; set; } = new byte[] { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88 };
+        private byte[] ServerChallenge { get; set; } = new byte[] { 0x67, 0x69, 0x76, 0x65, 0x63, 0x70, 0x72, 0x23 };
         private byte[] Reserved { get; set; } = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         private byte[] TargetInfoLen { get; set; } = new byte[] { 0x80, 0x00 };
         private byte[] TargetInfoMaxLen { get; set; } = new byte[] { 0x80, 0x00 };

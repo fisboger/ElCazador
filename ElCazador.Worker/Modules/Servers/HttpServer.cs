@@ -126,12 +126,12 @@ namespace ElCazador.Worker.Modules.Servers
                     short hostNameOffset = BitConverter.ToInt16(auth, 48);
                     string hostName = Encoding.Unicode.GetString(auth.Skip(hostNameOffset).Take(hostNameLen).ToArray());
 
-                    await Controller.Output(Name, new Hash
+                    await Controller.Output(Name, new User
                     {
                         IPAddress = context.Request.RemoteEndPoint.Address,
-                        User = user,
+                        Username = user,
                         Domain = domain,
-                        Challenge = "1122334455667788",
+                        Challenge = "6769766563707223",
                         NetLMHash = String.Concat(ntHash.Take(32)),
                         NetNTHash = string.Concat(ntHash.Skip(32))
                     });

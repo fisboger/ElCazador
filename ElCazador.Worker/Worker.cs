@@ -21,7 +21,7 @@ namespace ElCazador.Worker
                                                                                      // private static Thread SpooferWork { get; set; }
                                                                                      // private static Thread SMBServerWork { get; set; }
                                                                                      // private static Thread HTTPServerWork { get; set; }
-        private static IDictionary<string, Hash> Hashes { get; set; } = new ConcurrentDictionary<string, Hash>();
+        private static IDictionary<string, User> Hashes { get; set; } = new ConcurrentDictionary<string, User>();
 
         private IWorkerController Controller { get; set; }
 

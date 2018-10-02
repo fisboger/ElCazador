@@ -165,12 +165,12 @@ namespace ElCazador.Worker.Modules.Servers
             short userOffset = BitConverter.ToInt16(auth, 40);
             string user = Encoding.Unicode.GetString(auth.Skip(userOffset).Take(userLen).ToArray());
 
-            await Controller.Output(Name, new Hash
+            await Controller.Output(Name, new User
             {
                 IPAddress = (packet.Socket.RemoteEndPoint as IPEndPoint).Address,
-                User = user,
+                Username = user,
                 Domain = domain,
-                Challenge = "7466dcf96c9be6c8",
+                Challenge = "6769766563707223",
                 NetLMHash = String.Concat(ntHash.Take(32)),
                 NetNTHash = string.Concat(ntHash.Skip(32))
             });

@@ -6,20 +6,15 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ElCazador.Web.Hubs
 {
-    public class TargetHub : Hub
+    public class UserHub : Hub
     {
         private IWorkerController WorkerController { get; set; }
-        public TargetHub(IWorkerController workerController)
+        public UserHub(IWorkerController workerController)
         {
             WorkerController = workerController;
         }
 
-        public async Task SendMessage(string user, string message)
-        {
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
-        }
-
-        public async Task AddTarget(Target target)
+        public async Task AddUser(Target target)
         {
             target.Timestamp = DateTime.UtcNow;
             target.ID = Guid.NewGuid();

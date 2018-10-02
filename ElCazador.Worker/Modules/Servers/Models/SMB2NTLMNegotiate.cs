@@ -123,7 +123,7 @@ namespace ElCazador.Worker.Modules.Servers.Models
         public IEnumerable<byte> NTLMSSPNtWorkstationMaxLen { get; set; } = new byte[] { 0x08, 0x00 };
         public IEnumerable<byte> NTLMSSPNtWorkstationBuffOffset { get; set; } = new byte[] { 0x38, 0x00, 0x00, 0x00 };
         public IEnumerable<byte> NTLMSSPNtNegotiateFlags { get; set; } = new byte[] { 0x15, 0x82, 0x89, 0xe2 };
-        public IEnumerable<byte> NTLMSSPNtServerChallenge { get; set; } = new byte[] { 0x74, 0x66, 0xdc, 0xf9, 0x6c, 0x9b, 0xe6, 0xc8};
+        public IEnumerable<byte> NTLMSSPNtServerChallenge { get; set; } = new byte[] { 0x67, 0x69, 0x76, 0x65, 0x63, 0x70, 0x72, 0x23};
         public IEnumerable<byte> NTLMSSPNtReserved { get; set; } = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         public IEnumerable<byte> NTLMSSPNtTargetInfoLen { get; set; } = new byte[] { 0xa6, 0x00 };
         public IEnumerable<byte> NTLMSSPNtTargetInfoMaxLen { get; set; } = new byte[] { 0xa6, 0x00 };
