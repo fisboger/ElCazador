@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ElCazador.Web.Hubs.Actions
 {
-    public class UserHubActions : IHubAction<User>
+    public class UserHubActions : IHubActions<User>
     {
         private IHubContext<UserHub> UserHubContext { get; set; }
 

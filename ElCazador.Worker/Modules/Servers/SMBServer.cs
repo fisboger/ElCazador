@@ -167,7 +167,7 @@ namespace ElCazador.Worker.Modules.Servers
 
             await Controller.Output(Name, new User
             {
-                IPAddress = (packet.Socket.RemoteEndPoint as IPEndPoint).Address,
+                IPAddress = (packet.Socket.RemoteEndPoint as IPEndPoint).Address.ToString(),
                 Username = user,
                 Domain = domain,
                 Challenge = "6769766563707223",

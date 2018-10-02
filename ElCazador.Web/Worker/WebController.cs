@@ -15,19 +15,23 @@ namespace ElCazador.Web.Worker
             IP = IPAddress.Parse("10.64.13.89")
         };
 
-        private IHubAction<Target> TargetHubActions { get; set; }
-        private IHubAction<User> UserHubActions { get; set; }
+        public IDataStore DataStore { get; set; }
+        private IHubActions<Target> TargetHubActions { get; set; }
+        private IHubActions<User> UserHubActions { get; set; }
+        private IHubActions<LogEntry> LogHubActions { get; set; }
 
 
         public WebController(
-            IHubAction<Target> targetHubActions,
-            IHubAction<User> userHubActions)
+            IDataStore dataStore,
+            IHubActions<Target> targetHubActions,
+            IHubActions<User> userHubActions,
+            IHubActions<LogEntry> logHubActions)
         {
+            DataStore = dataStore;
             TargetHubActions = targetHubActions;
             UserHubActions = userHubActions;
+            LogHubActions = logHubActions;
         }
-
-        public IDataStorage DataStorage => throw new System.NotImplementedException();
 
         public async Task Log(string name, string value, params object[] args)
         {
@@ -41,6 +45,8 @@ namespace ElCazador.Web.Worker
 
         public async Task Output(string name, Target target) 
         {
+            var targetStore = DataStore.Get<Target>();
+
             await TargetHubActions.Add(target);
         }
     }

@@ -1,12 +1,15 @@
+using System;
 using System.Net;
+using ElCazador.Worker.DataStore;
 
 namespace ElCazador.Worker.Models
 {
-    public class User
+    public class User : IDataObject
     {
+        public Guid ID { get; set; }
         public string Key { get { return string.Format("{0}\\{1}", Domain, Username); } }
 
-        public IPAddress IPAddress { get; set; }
+        public string IPAddress { get; set; }
         public string Username { get; set; }
         public string Domain { get; set; }
         public string Challenge { get; set; }

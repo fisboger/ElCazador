@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ElCazador.Web.DataStore;
 using ElCazador.Web.Hubs;
+using ElCazador.Web.Hubs.Actions;
 using ElCazador.Web.Worker;
 using ElCazador.Worker.Interfaces;
+using ElCazador.Worker.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.Webpack;
@@ -35,7 +38,12 @@ namespace ElCazador.Web
             services.AddMvc();
             services.AddSignalR();
 
+            services.AddScoped<IHubActions<Target>, TargetHubActions>();
+            services.AddScoped<IHubActions<User>, UserHubActions>();
+            services.AddScoped<IHubActions<LogEntry>, LogHubActions>();
+
             services.AddSingleton<IWorkerController, WebController>();
+            services.AddSingleton<IDataStore, JsonDataStore>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

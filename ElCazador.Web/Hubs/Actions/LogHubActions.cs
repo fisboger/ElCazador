@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ElCazador.Web.Hubs.Actions
 {
-    public class LogHubActions : IHubAction<LogEntry>
+    public class LogHubActions : IHubActions<LogEntry>
     {
         private IHubContext<LogHub> LogHubContext { get; set; }
 

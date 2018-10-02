@@ -8,7 +8,7 @@ namespace ElCazador.Terminal
 {
     public class TerminalController : IWorkerController
     {
-        public IDataStorage DataStorage => throw new System.NotImplementedException();
+        public IDataStore DataStore => throw new System.NotImplementedException();
 
         public WorkerSettings WorkerSettings { get; private set;}
 
@@ -29,7 +29,7 @@ namespace ElCazador.Terminal
             Console.WriteLine(
                     @"{0}Received NetNTLMv2 hash from {1}{0}{2}::{3}:{4}:{5}:{6}",
                     Environment.NewLine,
-                    user.IPAddress.ToString(),
+                    user.IPAddress,
                     user.Username,
                     user.Domain,
                     user.Challenge,
