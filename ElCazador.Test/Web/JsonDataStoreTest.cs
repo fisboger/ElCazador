@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 using ElCazador.Web.DataStore;
 using ElCazador.Worker.Interfaces;
 using ElCazador.Worker.Models;
@@ -22,6 +25,9 @@ namespace ElCazador.Test.Web
         private IDataStore DataStore;
         public JsonDataStoreTest()
         {
+            File.Delete(string.Format("{0}/{1}", Path, "Target.json"));
+            File.Delete(string.Format("{0}/{1}", Path, "User.json"));
+
             HostingEnvironmentMock = new Mock<IHostingEnvironment>();
 
             HostingEnvironmentMock.Setup((x) => x.ContentRootPath).Returns(Path);
@@ -74,6 +80,37 @@ namespace ElCazador.Test.Web
             Assert.True(File.Exists(string.Format("{0}/{1}", Path, "Target.json")));
             Assert.True(File.Exists(string.Format("{0}/{1}", Path, "User.json")));
         }
+
+        // [Fact]
+        // public void ParallelTestAdd()
+        // {
+        //     var targetStore = DataStore.Get<Target>();
+
+        //     var parallel = Parallel.For(0, 1000, new ParallelOptions
+        //     {
+        //         MaxDegreeOfParallelism = 4
+        //     }, (index) =>
+        //     {
+        //         var target = new Target
+        //         {
+        //             ID = Guid.NewGuid(),
+        //             Hostname = "Test-host",
+        //             IP = "192.168.0.2",
+        //             Dumped = false,
+        //             Timestamp = DateTime.UtcNow
+        //         };
+
+        //         targetStore.Add(target);
+        //     });
+
+        //     // THis is needed to not fuck up all other tests as it will not delete the file...
+        //     while (!parallel.IsCompleted)
+        //     {
+        //         Thread.Sleep(50);
+        //     }
+
+        //     Assert
+        // }
 
         [Fact]
         public void TestDelete()

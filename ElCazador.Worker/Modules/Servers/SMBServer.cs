@@ -26,6 +26,13 @@ namespace ElCazador.Worker.Modules.Servers
             await StartSocket();
         }
 
+        public async Task Stop()
+        {
+            Socket.Close();
+
+            await Task.CompletedTask;
+        }
+
         private async Task StartSocket()
         {
             try

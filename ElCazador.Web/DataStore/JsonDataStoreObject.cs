@@ -20,7 +20,7 @@ namespace ElCazador.Web.DataStore
         private string FullPath => string.Format("{0}/{1}", HostingEnvironment.ContentRootPath, FileName);
 
         private IHostingEnvironment HostingEnvironment { get; set; }
-        protected ConcurrentDictionary<Guid, T> Store { get; set; }
+        private ConcurrentDictionary<Guid, T> Store { get; set; }
 
         private SemaphoreSlim Semaphore = new SemaphoreSlim(1);
 

@@ -38,12 +38,14 @@ namespace ElCazador.Web
             services.AddMvc();
             services.AddSignalR();
 
-            services.AddScoped<IHubActions<Target>, TargetHubActions>();
-            services.AddScoped<IHubActions<User>, UserHubActions>();
-            services.AddScoped<IHubActions<LogEntry>, LogHubActions>();
+            services.AddTransient<IHubActions<Target>, TargetHubActions>();
+            services.AddTransient<IHubActions<User>, UserHubActions>();
+            services.AddTransient<IHubActions<LogEntry>, LogHubActions>();
 
             services.AddSingleton<IWorkerController, WebController>();
             services.AddSingleton<IDataStore, JsonDataStore>();
+
+            services.AddHostedService<ElCazador.Worker.Worker>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

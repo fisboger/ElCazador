@@ -31,6 +31,13 @@ namespace ElCazador.Worker.Modules.Servers
             await Listen();
         }
 
+        public async Task Stop()
+        {
+            Listener.Close();
+
+            await Task.CompletedTask;
+        }
+
         private async Task Listen()
         {
             Listener = new HttpListener();

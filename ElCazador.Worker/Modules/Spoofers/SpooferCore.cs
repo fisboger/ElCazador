@@ -52,6 +52,16 @@ namespace ElCazador.Worker.Modules.Spoofers
             await StartSockets();
         }
 
+        public async Task Stop()
+        {
+            foreach (var socket in SocketTypes)
+            {
+                socket.Socket.Close();
+            }
+
+            await Task.CompletedTask;
+        }
+
         private void AddSpoofer(Models.SocketType socketType, ISpoofer spoofer, bool run)
         {
             if (!run)
@@ -109,8 +119,6 @@ namespace ElCazador.Worker.Modules.Spoofers
             {
                 await StartSocket(socketType);
             }
-
-            await Controller.Log(Name, "Spoofer module started");
 
             while (true)
             {

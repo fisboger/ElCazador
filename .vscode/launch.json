@@ -14,7 +14,18 @@
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "integratedTerminal"
-        }, 
+        },
+        {
+            "name": "ElCazador Web",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/ElCazador.Web/bin/Debug/netcoreapp2.1/ElCazador.WEb.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "integratedTerminal"
+        },
         {
             "name": ".NET Core Attach",
             "type": "coreclr",

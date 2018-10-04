@@ -6,6 +6,7 @@ namespace ElCazador.Worker.Modules
     {
         string Name { get; }
         Task Run();
+        Task Stop();
         bool IsEnabled { get; }
     }
 }
