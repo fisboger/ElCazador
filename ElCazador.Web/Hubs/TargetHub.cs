@@ -21,10 +21,7 @@ namespace ElCazador.Web.Hubs
 
         public async Task AddTarget(Target target)
         {
-            target.Timestamp = DateTime.UtcNow;
-            target.ID = Guid.NewGuid();
-
-            await Clients.All.SendAsync("AddTarget", target);
+            await WorkerController.Add("TargetHub", target);
         }
     }
 }

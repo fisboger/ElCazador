@@ -15,5 +15,8 @@ namespace ElCazador.Worker.Models
         public string Challenge { get; set; }
         public string NetLMHash { get; set; }
         public string NetNTHash { get; set; }
+        
+        public string Hash { get; set; }
+        public bool clearTextPW { get; set; }
     }
 }

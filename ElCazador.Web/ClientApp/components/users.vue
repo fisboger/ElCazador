@@ -56,85 +56,54 @@
 </template>
 
 <script>
+import { mapActions, mapState, mapMutations } from "vuex";
+
 export default {
   data() {
     return {
-      users: {
-        isLoading: false,
-        data: [
-          {
-            timestamp: "2018-05-14 13:00:00",
-            username: "sfr",
-            machine: "sfr-tp",
-            hash: "838ece1033bf7c7468e873e79ba2a3ec",
-            clearTextPw: true,
-            type: "NTLM",
-            "collection-method": "Dump"
-          },
-          {
-            timestamp: "2018-05-14 14:00:00",
-            username: "Håndværker",
-            machine: "sfr-tp",
-            hash: "838ece1033bf7c7468e873e79ba2a3ec",
-            clearTextPw: false,
-            type: "NTLM",
-            "collection-method": "Dump"
-          },
-          {
-            timestamp: "2018-05-14 15:00:00",
-            username: "sfr-admin",
-            machine: "sfr-tp",
-            hash: "838ece1033bf7c7468e873e79ba2a3ec",
-            clearTextPw: false,
-            type: "NTLM",
-            "collection-method": "Dump"
-          },
-          {
-            timestamp: "2018-05-14 16:00:00",
-            username: "tap",
-            machine: "sfr-tp",
-            hash: "838ece1033bf7c7468e873e79ba2a3ec",
-            clearTextPw: false,
-            type: "NTLM",
-            "collection-method": "Dump"
-          },
-          {
-            timestamp: "2018-05-14 17:00:00",
-            username: "tju",
-            machine: "sfr-tp",
-            hash: "838ece1033bf7c7468e873e79ba2a3ec",
-            clearTextPw: false,
-            type: "NTLM",
-            "collection-method": "Dump"
-          },
-          {
-            timestamp: "2018-05-14 18:00:00",
-            username: "sfr",
-            machine: "sfr-tp",
-            hash: "838ece1033bf7c7468e873e79ba2a3ec",
-            clearTextPw: false,
-            type: "NTLM",
-            "collection-method": "Dump"
-          },
-          {
-            timestamp: "2018-05-14 12:00:00",
-            username: "sfr",
-            machine: "sfr-tp",
-            hash: "838ece1033bf7c7468e873e79ba2a3ec",
-            clearTextPw: false,
-            type: "NTLM",
-            "collection-method": "Dump"
-          }
-        ]
-      },
       addUserVisible: false,
-      form: {
-        username: "",
-        password: "",
-        passwordType: ""
-      },
+      form: {},
       formLabelWidth: "120px"
     };
+  },
+  computed: {
+    ...mapState({
+      currentUsers: state => state.users
+    })
+  },
+  created: function() {
+    this.connection = new this.$signalR.HubConnectionBuilder()
+      .withUrl("http://localhost:5000/UserHub")
+      .configureLogging(this.$signalR.LogLevel.Error)
+      .build();
+  },
+  mounted: function() {
+    this.connection.start().catch(function(err) {
+      console.error(err);
+    });
+
+    this.connection.on("AddUser", user => {
+      console.log(target);
+      this.$store.commit("ADD_USER", {
+        id: user.ID,
+        ipAddress: user.IPAddress,
+        domain: user.Domain,
+        hash: user.NetNTHash,
+        clearTextPw: user.clearTextPW
+      });
+    });
+  },
+  methods: {
+      add: function(event) {
+          this.connection.invoke("AddUser", {
+            ipAddress: user.IPAddress,
+            domain: user.Domain,
+            hash: user.NetNTHash,
+            clearTextPw: user.clearTextPW
+          }).catch(function(err) {
+          console.error(err);
+        });
+      }
   }
 };
 </script>

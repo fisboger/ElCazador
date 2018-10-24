@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using ElCazador.Worker.DataStore;
 using ElCazador.Worker.Models;
 
 namespace ElCazador.Worker.Interfaces
@@ -8,7 +9,7 @@ namespace ElCazador.Worker.Interfaces
         WorkerSettings WorkerSettings { get; }
         IDataStore DataStore { get; }
 
-        Task Output(string name, User user);
+        Task Add<T>(string name, T entity) where T : IDataObject;
         Task Log(string name, string value, params object[] args);
     }
 }

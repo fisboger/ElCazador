@@ -10,7 +10,7 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="abort()">Cancel</el-button>
+        <el-button @click="targetDialogVisible = false">Cancel</el-button>
         <el-button type="primary" @click="(targetDialogAction == 'ADD') ? add() : edit()">Confirm</el-button>
       </span>
     </el-dialog>
@@ -19,10 +19,10 @@
       <el-card class="box-card">
         <div slot="header" class="clearfix">
           <span>Targets</span>
-          <el-button style="float: right;" @click="targetDialogVisible = true" type="primary" icon="el-icon-plus" size="mini" circle></el-button>
+          <el-button style="float: right;" @click="prepareAdd()" type="primary" icon="el-icon-plus" size="mini" circle></el-button>
         </div>
         <template>
-          <el-table v-loading="currentTargets.isLoading" :data="currentTargets.data" style="min-height:200px" max-height="200">
+          <el-table v-loading="currentTargets.isLoading" :data="currentTargets.data" style="min-height:200px" empty-text="The challenge is givecpr#" max-height="200">
             <el-table-column sortable prop="hostname" label="Host">
             </el-table-column>
             <el-table-column sortable prop="ip" label="IP" min-width="100">
@@ -47,9 +47,6 @@
 
 <script>
 import { mapActions, mapState, mapMutations } from "vuex";
-
-const EDIT = "EDIT";
-const ADD = "ADD";
 
 export default {
   data: function() {
@@ -90,7 +87,6 @@ export default {
   },
   methods: {
     add: function(event) {
-
       this.connection
         .invoke("AddTarget", {
           hostname: this.form.hostname,
@@ -101,13 +97,13 @@ export default {
           console.error(err);
         });
 
-      this.abort();
+      this.targetDialogVisible = false;
     },
     edit: function(event) {
       this.$store.commit("EDIT_TARGET", this.form);
       this.form = {};
 
-      this.abort();
+      this.targetDialogVisible = false;
     },
     prepareEdit: function(index) {
       var element = this.currentTargets.data[index];
@@ -121,10 +117,11 @@ export default {
       this.targetDialogAction = EDIT;
       this.targetDialogVisible = true;
     },
-    abort: function() {
+    prepareAdd: function() {
+      this. form = {};
+    
       this.targetDialogAction = ADD;
-      this.form = {};
-      this.targetDialogVisible = false;
+      this.targetDialogVisible = true;
     },
     send: function() {}
   }

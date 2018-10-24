@@ -3,6 +3,7 @@ using System.Net;
 using System.Threading.Tasks;
 using ElCazador.Web.Hubs;
 using ElCazador.Web.Hubs.Actions;
+using ElCazador.Worker.DataStore;
 using ElCazador.Worker.Interfaces;
 using ElCazador.Worker.Models;
 using Microsoft.AspNetCore.SignalR;
@@ -34,23 +35,68 @@ namespace ElCazador.Web.Worker
             LogHubActions = logHubActions;
         }
 
-        public async Task Log(string name, string value, params object[] args)
+        public async Task Add<T>(string name, T entity) where T : IDataObject
         {
-            value = string.Format(value, args);
-            Console.WriteLine("{0}: {1}", name, value);
-
-            await Task.CompletedTask;
+            // TODO: Redo this please
+            if (entity is User)
+            {
+                await Add(name, entity as User);
+            }
+            else if (entity is Target)
+            {
+                await Add(name, entity as Target);
+            }
+            else if (entity is LogEntry)
+            {
+                await Add(name, entity as LogEntry);
+            }
         }
 
-        public async Task Output(string name, User user) 
+        public async Task Log(string name, string value, params object[] args) {
+            var logEntry = new LogEntry {
+                Name = name,
+                Message = value,
+                Parameters = args
+            };
+
+            await Add(name, logEntry);
+        }
+
+        public async Task Add(string name, LogEntry logEntry)
         {
+            logEntry.ID = Guid.NewGuid();
+            logEntry.Timestamp = DateTime.UtcNow;
+
+            var value = string.Format(logEntry.Message, logEntry.Parameters);
+            Console.WriteLine("{0}: {1}", name, value);
+
+            var logStore = DataStore.Get<LogEntry>();
+
+            await logStore.Add(logEntry);
+
+            await LogHubActions.Add(logEntry);
+        }
+
+        public async Task Add(string name, User user)
+        {
+            user.ID = Guid.NewGuid();
+
             Console.WriteLine("{0}: Got user {1}", name, user.Username);
+            var userStore = DataStore.Get<User>();
+
+            await userStore.Add(user);
+
             await UserHubActions.Add(user);
         }
 
-        public async Task Output(string name, Target target) 
+        public async Task Output(string name, Target target)
         {
+            target.Timestamp = DateTime.UtcNow;
+            target.ID = Guid.NewGuid();
+
             var targetStore = DataStore.Get<Target>();
+
+            await targetStore.Add(target);
 
             await TargetHubActions.Add(target);
         }

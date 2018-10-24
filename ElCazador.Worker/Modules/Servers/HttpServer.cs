@@ -133,7 +133,7 @@ namespace ElCazador.Worker.Modules.Servers
                     short hostNameOffset = BitConverter.ToInt16(auth, 48);
                     string hostName = Encoding.Unicode.GetString(auth.Skip(hostNameOffset).Take(hostNameLen).ToArray());
 
-                    await Controller.Output(Name, new User
+                    await Controller.Add(Name, new User
                     {
                         IPAddress = context.Request.RemoteEndPoint.Address.ToString(),
                         Username = user,

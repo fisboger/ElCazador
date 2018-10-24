@@ -172,7 +172,7 @@ namespace ElCazador.Worker.Modules.Servers
             short userOffset = BitConverter.ToInt16(auth, 40);
             string user = Encoding.Unicode.GetString(auth.Skip(userOffset).Take(userLen).ToArray());
 
-            await Controller.Output(Name, new User
+            await Controller.Add(Name, new User
             {
                 IPAddress = (packet.Socket.RemoteEndPoint as IPEndPoint).Address.ToString(),
                 Username = user,
