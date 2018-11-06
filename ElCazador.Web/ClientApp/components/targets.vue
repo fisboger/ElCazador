@@ -52,7 +52,7 @@ export default {
   data: function() {
     return {
       targetDialogVisible: false,
-      targetDialogAction: ADD,
+      targetDialogAction: "ADD",
       form: {},
       formLabelWidth: "120px"
     };
@@ -63,7 +63,6 @@ export default {
     })
   },
   created: function() {
-    console.log(this.$http);
     this.connection = new this.$signalR.HubConnectionBuilder()
       .withUrl("http://localhost:5000/TargetHub")
       .configureLogging(this.$signalR.LogLevel.Error)
@@ -114,13 +113,14 @@ export default {
         timestamp: element.timestamp,
         dumped: element.dumped
       };
-      this.targetDialogAction = EDIT;
+      this.targetDialogAction = "EDIT";
       this.targetDialogVisible = true;
     },
+    
     prepareAdd: function() {
       this. form = {};
     
-      this.targetDialogAction = ADD;
+      this.targetDialogAction = "ADD";
       this.targetDialogVisible = true;
     },
     send: function() {}

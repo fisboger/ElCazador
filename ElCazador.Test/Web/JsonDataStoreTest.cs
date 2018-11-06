@@ -49,10 +49,8 @@ namespace ElCazador.Test.Web
             ID = Guid.NewGuid(),
             IPAddress = "192.168.0.2",
             Username = "TestUser",
-            Domain = "PWNABLE",
-            Challenge = "1122334455667788",
-            NetLMHash = "000000000000000000000000000000",
-            NetNTHash = "000000000000000000000000000000",
+            Hash = "000000000000000000000000000000:000000000000000000000000000000",
+            HashcatFormat = ""
         };
         #endregion
 

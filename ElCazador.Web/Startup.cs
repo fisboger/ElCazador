@@ -45,7 +45,7 @@ namespace ElCazador.Web
             services.AddSingleton<IWorkerController, WebController>();
             services.AddSingleton<IDataStore, JsonDataStore>();
 
-            services.AddHostedService<ElCazador.Worker.Worker>();
+            // services.AddHostedService<ElCazador.Worker.Worker>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -72,6 +72,8 @@ namespace ElCazador.Web
             app.UseSignalR(routes =>
             {
                 routes.MapHub<TargetHub>("/TargetHub");
+                routes.MapHub<UserHub>("/UserHub");
+                routes.MapHub<LogHub>("/LogHub");
             });
 
             app.UseMvc(routes =>

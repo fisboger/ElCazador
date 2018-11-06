@@ -52,8 +52,10 @@ namespace ElCazador.Web.Worker
             }
         }
 
-        public async Task Log(string name, string value, params object[] args) {
-            var logEntry = new LogEntry {
+        public async Task Log(string name, string value, params object[] args)
+        {
+            var logEntry = new LogEntry
+            {
                 Name = name,
                 Message = value,
                 Parameters = args
@@ -64,41 +66,35 @@ namespace ElCazador.Web.Worker
 
         public async Task Add(string name, LogEntry logEntry)
         {
-            logEntry.ID = Guid.NewGuid();
-            logEntry.Timestamp = DateTime.UtcNow;
-
             var value = string.Format(logEntry.Message, logEntry.Parameters);
             Console.WriteLine("{0}: {1}", name, value);
 
-            var logStore = DataStore.Get<LogEntry>();
-
-            await logStore.Add(logEntry);
-
-            await LogHubActions.Add(logEntry);
+            await Add(logEntry, LogHubActions);
+            
         }
 
         public async Task Add(string name, User user)
         {
-            user.ID = Guid.NewGuid();
-
             Console.WriteLine("{0}: Got user {1}", name, user.Username);
-            var userStore = DataStore.Get<User>();
 
-            await userStore.Add(user);
-
-            await UserHubActions.Add(user);
+            await Add(user, UserHubActions);
         }
 
-        public async Task Output(string name, Target target)
+        public async Task Add(string name, Target target)
         {
-            target.Timestamp = DateTime.UtcNow;
-            target.ID = Guid.NewGuid();
+            Console.WriteLine("{0}: Got a target {1}", name, target.Hostname);
+            
+            await Add(target, TargetHubActions);
+        }
 
-            var targetStore = DataStore.Get<Target>();
+        private async Task Add<T>(T entity, IHubActions<T> hub)
+        where T : IDataObject
+        {
+            var store = DataStore.Get<T>();
 
-            await targetStore.Add(target);
+            await store.Add(entity);
 
-            await TargetHubActions.Add(target);
+            await hub.Add(entity);
         }
     }
 }

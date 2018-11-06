@@ -12,7 +12,6 @@ Vue.use(ElementUI);
 var signalR = require('@aspnet/signalr/dist/browser/signalr.min.js');
 
 Vue.prototype.$http = axios;
-console.log(signalR);
 Vue.prototype.$signalR = signalR;
 
 sync(store, router)

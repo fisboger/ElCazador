@@ -62,7 +62,7 @@ namespace ElCazador.Worker
             await Controller.Log("Worker", "Stopping modules");
             foreach (var module in Modules)
             {
-                await Task.Run(module.Run);
+                await module.Stop();
                 await Controller.Log("Worker", "Stopped module {0}", module.Name);
             }
         }

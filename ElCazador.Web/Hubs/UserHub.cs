@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using ElCazador.Web.Hubs.Actions;
 using ElCazador.Worker.Interfaces;
 using ElCazador.Worker.Models;
 using Microsoft.AspNetCore.SignalR;
@@ -9,17 +10,31 @@ namespace ElCazador.Web.Hubs
     public class UserHub : Hub
     {
         private IWorkerController WorkerController { get; set; }
-        public UserHub(IWorkerController workerController)
+        private IDataStore DataStore { get; set; }
+        private IHubActions<User> UserHubActions { get; set; }
+        public UserHub(
+            IWorkerController workerController,
+            IDataStore dataStore,
+            IHubActions<User> userHubActions)
         {
             WorkerController = workerController;
+            DataStore = dataStore;
+            UserHubActions = userHubActions;
         }
-
-        public async Task AddUser(Target target)
+        public async override Task OnConnectedAsync()
         {
-            target.Timestamp = DateTime.UtcNow;
-            target.ID = Guid.NewGuid();
+            await base.OnConnectedAsync();
 
-            await Clients.All.SendAsync("AddTarget", target);
+            var store = DataStore.Get<User>();
+
+            foreach (var user in store.All)
+            {
+                await UserHubActions.Add(user);
+            }
+        }
+        public async Task AddUser(User user)
+        {
+            await WorkerController.Add("UserHub", user);
         }
     }
 }

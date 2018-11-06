@@ -6,17 +6,18 @@ namespace ElCazador.Worker.Models
 {
     public class User : IDataObject
     {
-        public Guid ID { get; set; }
-        public string Key { get { return string.Format("{0}\\{1}", Domain, Username); } }
+        public User()
+        {
+            ID = Guid.NewGuid();
+            Timestamp = DateTime.UtcNow;
+        }
 
+        public Guid ID { get; set; }
+        public DateTime Timestamp { get; set; }
         public string IPAddress { get; set; }
         public string Username { get; set; }
-        public string Domain { get; set; }
-        public string Challenge { get; set; }
-        public string NetLMHash { get; set; }
-        public string NetNTHash { get; set; }
-        
         public string Hash { get; set; }
-        public bool clearTextPW { get; set; }
+        public bool IsClearText { get; set; }
+        public string HashcatFormat { get; set; }
     }
 }

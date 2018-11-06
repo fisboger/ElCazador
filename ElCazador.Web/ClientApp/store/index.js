@@ -76,11 +76,9 @@ export default new Vuex.Store({
             });
 
             element.username = user.username;
-            element.targetID = user.targetID;
             element.hash = user.hash;
-            element.clearTextPw = user.clearTextPw;
-            element.type = user.type;
-            element.collectionMethod = user.collectionMethod;
+            element.isClearText = user.isClearText;
+            element.hashcatFormat = user.hashcatFormat;
         },
         //#endregion
         //#region Log

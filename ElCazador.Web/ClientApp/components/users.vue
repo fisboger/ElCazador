@@ -1,24 +1,23 @@
 <template>
     <div>
-        <el-dialog title="Add user" :visible.sync="addUserVisible" width="20%">
+        <el-dialog title="Add user" :visible.sync="userDialogVisible" width="20%">
             <el-form :model="form">
                 <el-form-item label="Username" :label-width="formLabelWidth">
-                    <el-input v-model="form.name" autocomplete="off"></el-input>
+                    <el-input v-model="form.username" autocomplete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="Password" :label-width="formLabelWidth">
-                    <el-input v-model="form.name" autocomplete="off"></el-input>
+                    <el-input v-model="form.password" autocomplete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="Password type" :label-width="formLabelWidth">
-                    <el-select v-model="form.region" placeholder="Password type">
-                        <el-option label="NTLM" value="ntlm"></el-option>
-                        <el-option label="NetNTLMv2" value="netntlmv2"></el-option>
+                    <el-select v-model="form.type" placeholder="Password type">
+                        <el-option sel label="NTLM" value="ntlm"></el-option>
                         <el-option label="Clear-text" value="clearText"></el-option>
                     </el-select>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
-                <el-button @click="addUserVisible = false">Cancel</el-button>
-                <el-button type="primary" @click="addUserVisible = false">Confirm</el-button>
+                <el-button @click="userDialogVisible = false">Cancel</el-button>
+                <el-button type="primary" @click="(userDialogAction == 'ADD') ? add() : edit()">Confirm</el-button>
             </span>
         </el-dialog>
 
@@ -26,10 +25,10 @@
             <el-card class="box-card">
                 <div slot="header" class="clearfix">
                     <span>Users</span>
-                    <el-button style="float: right;" @click="addUserVisible = true" type="primary" icon="el-icon-plus" size="mini" circle></el-button>
+                    <el-button style="float: right;" @click="prepareAdd()" type="primary" icon="el-icon-plus" size="mini" circle></el-button>
                 </div>
                 <template>
-                    <el-table v-loading="users.isLoading" :data="users.data" style="min-height:200px" :default-sort="{prop: 'timestamp', order: 'descending'}" max-height="200">
+                    <el-table v-loading="currentUsers.isLoading" :data="currentUsers.data" style="min-height:200px" :default-sort="{prop: 'timestamp', order: 'descending'}" max-height="200" empty-text="Hva' så håndværker?">
                         <!-- <el-table-column sortable prop="timestamp" label="Time">
                   </el-table-column> -->
                         <el-table-column sortable prop="username" label="User" min-width="100">
@@ -45,7 +44,7 @@
 
                         <el-table-column fixed="right" align="right" min-width="40">
                             <template slot-scope="scope">
-                                <el-button class="zero-padding" type="text" icon="el-icon-edit" circle></el-button>
+                                <el-button @click="prepareEdit(scope.$index)" class="zero-padding" type="text" icon="el-icon-edit" circle></el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -61,7 +60,8 @@ import { mapActions, mapState, mapMutations } from "vuex";
 export default {
   data() {
     return {
-      addUserVisible: false,
+      userDialogVisible: false,
+      userDialogAction: "ADD",
       form: {},
       formLabelWidth: "120px"
     };
@@ -83,27 +83,53 @@ export default {
     });
 
     this.connection.on("AddUser", user => {
-      console.log(target);
+      console.log(user);
       this.$store.commit("ADD_USER", {
-        id: user.ID,
-        ipAddress: user.IPAddress,
-        domain: user.Domain,
-        hash: user.NetNTHash,
-        clearTextPw: user.clearTextPW
+        id: user.id,
+        ipAddress: user.ipAddress,
+        username: user.username,
+        hash: user.hash,
+        isClearText: user.isClearText,
+        hashcatFormat: user.hashcatFormat
       });
     });
   },
   methods: {
-      add: function(event) {
-          this.connection.invoke("AddUser", {
-            ipAddress: user.IPAddress,
-            domain: user.Domain,
-            hash: user.NetNTHash,
-            clearTextPw: user.clearTextPW
-          }).catch(function(err) {
+    add: function(event) {
+      this.connection
+        .invoke("AddUser", {
+          username: this.form.username,
+          hash: this.form.password
+        })
+        .catch(function(err) {
           console.error(err);
         });
-      }
+
+        this.userDialogVisible = false;
+    },
+    edit: function(event) {
+      this.$store.commit("EDIT_USER", this.form);
+      this.form = {};
+
+      this.userDialogVisible = false;
+    },
+    prepareEdit: function(index) {
+      var element = this.currentUsers.data[index];
+      this.form = {
+        id: element.id,
+        username: element.username,
+        password: element.hash
+      };
+
+      this.userDialogAction = "EDIT";
+      this.userDialogVisible = true;
+    },
+    prepareAdd: function() {
+      this.form = {};
+
+      this.userDialogAction = "ADD";
+      this.userDialogVisible = true;
+    }
   }
 };
 </script>

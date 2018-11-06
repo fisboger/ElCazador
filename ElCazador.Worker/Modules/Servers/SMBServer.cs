@@ -176,11 +176,25 @@ namespace ElCazador.Worker.Modules.Servers
             {
                 IPAddress = (packet.Socket.RemoteEndPoint as IPEndPoint).Address.ToString(),
                 Username = user,
-                Domain = domain,
-                Challenge = "6769766563707223",
-                NetLMHash = String.Concat(ntHash.Take(32)),
-                NetNTHash = string.Concat(ntHash.Skip(32))
+                Hash = string.Format("{0}:{1}", String.Concat(ntHash.Take(32)), string.Concat(ntHash.Skip(32))),
+                HashcatFormat = string.Format(
+                    "{0}::{1}:{2}:{3}:{4}",
+                    user,
+                    domain,
+                    "6769766563707223",
+                    string.Concat(ntHash.Take(32)),
+                    string.Concat(ntHash.Skip(32))
+                )
             });
+
+            /*
+            await Controller.Add(Name, new User
+                    {
+                        IPAddress = context.Request.RemoteEndPoint.Address.ToString(),
+                        Username = user,
+                        Hash = string.Format("{0}:{1}", String.Concat(ntHash.Take(32)), string.Concat(ntHash.Skip(32))),
+                        HashcatFormat = ""
+                    }); */
         }
 
 

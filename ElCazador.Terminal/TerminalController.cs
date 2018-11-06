@@ -45,14 +45,10 @@ namespace ElCazador.Terminal
         public async Task Output(string name, User user)
         {
             Console.WriteLine(
-                    @"{0}Received NetNTLMv2 hash from {1}{0}{2}::{3}:{4}:{5}:{6}",
-                    Environment.NewLine,
+                    @"Received NetNTLMv2 hash from {0}{1}{2}",
                     user.IPAddress,
-                    user.Username,
-                    user.Domain,
-                    user.Challenge,
-                    String.Concat(user.NetLMHash),
-                    string.Concat(user.NetNTHash)
+                    Environment.NewLine,
+                    user.HashcatFormat
                 );
 
             await Task.CompletedTask;
