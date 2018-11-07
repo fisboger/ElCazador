@@ -1,3 +1,4 @@
+using System.Threading;
 using ElCazador.Worker.Interfaces;
 
 namespace ElCazador.Worker.Modules

@@ -52,8 +52,11 @@ namespace ElCazador.Worker
             await Controller.Log("Worker", "Starting modules");
             foreach (var module in Modules)
             {
-                await Task.Run(module.Run);
-                await Controller.Log("Worker", "Started module {0}", module.Name);
+                if (module is IPersistantModule)
+                {
+                    await Task.Run(((IPersistantModule)module).Run, cancellationToken);
+                    await Controller.Log("Worker", "Started module {0}", module.Name);
+                }
             }
         }
 
@@ -62,8 +65,11 @@ namespace ElCazador.Worker
             await Controller.Log("Worker", "Stopping modules");
             foreach (var module in Modules)
             {
-                await module.Stop();
-                await Controller.Log("Worker", "Stopped module {0}", module.Name);
+                if (module is IPersistantModule)
+                {
+                    await ((IPersistantModule)module).Stop();
+                    await Controller.Log("Worker", "Stopped module {0}", module.Name);
+                }
             }
         }
 
