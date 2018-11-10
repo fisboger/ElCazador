@@ -37,7 +37,7 @@ namespace ElCazador.Test.Web
         #region Data
         Target Target = new Target
         {
-            ID = Guid.NewGuid(),
+            // Key = Guid.NewGuid(),
             Hostname = "Test-host",
             IP = "192.168.0.2",
             Dumped = false,
@@ -46,7 +46,7 @@ namespace ElCazador.Test.Web
 
         User User = new User
         {
-            ID = Guid.NewGuid(),
+            // Key = Guid.NewGuid(),
             IPAddress = "192.168.0.2",
             Username = "TestUser",
             Hash = "000000000000000000000000000000:000000000000000000000000000000",
@@ -69,8 +69,8 @@ namespace ElCazador.Test.Web
             Assert.Single(allTargets);
             Assert.Single(allUsers);
 
-            var target = targetStore.Get(Target.ID);
-            var user = userStore.Get(User.ID);
+            var target = targetStore.Get(Target.Key);
+            var user = userStore.Get(User.Key);
 
             Assert.NotNull(target);
             Assert.NotNull(user);
@@ -134,7 +134,7 @@ namespace ElCazador.Test.Web
             Target.Hostname = "This is a test";
             targetStore.Edit(Target);
 
-            var target = targetStore.Get(Target.ID);
+            var target = targetStore.Get(Target.Key);
 
             Assert.Equal(Target.Dumped, target.Dumped);
 
@@ -151,7 +151,7 @@ namespace ElCazador.Test.Web
 
             targetStore.Add(Target);
 
-            var target = targetStore.Get(Target.ID);
+            var target = targetStore.Get(Target.Key);
 
             var savedJson = File.ReadAllText(string.Format("{0}/{1}", Path, "Target.json"));
             var generatedJson = JsonConvert.SerializeObject(new List<Target> { target }, Formatting.None);

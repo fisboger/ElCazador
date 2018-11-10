@@ -23,14 +23,21 @@ namespace ElCazador.Web.DataStore
         private DateTime LastRead { get; set; }
 
         private IHostingEnvironment HostingEnvironment { get; set; }
-        private ConcurrentDictionary<Guid, T> Store { get; set; }
+        private ConcurrentDictionary<object, T> Store { get; set; }
 
         private SemaphoreSlim Semaphore = new SemaphoreSlim(1);
+
+        private JsonSerializerSettings JsonSettings { get; set; }
 
         public JsonDataStoreObject(
             IHostingEnvironment hostingEnvironment)
         {
             HostingEnvironment = hostingEnvironment;
+
+            JsonSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new EncryptedStringPropertyResolver("AWESOMEPASSWORD")
+            };
 
             Initialize();
             StartWatcher();
@@ -38,7 +45,7 @@ namespace ElCazador.Web.DataStore
 
         private void Initialize()
         {
-            Store = new ConcurrentDictionary<Guid, T>();
+            Store = new ConcurrentDictionary<object, T>();
 
             if (File.Exists(FullPath))
             {
@@ -48,7 +55,7 @@ namespace ElCazador.Web.DataStore
                 if (!string.IsNullOrWhiteSpace(content))
                 {
                     var entities = Deserialize(content);
-                    Store = new ConcurrentDictionary<Guid, T>(entities.ToDictionary(entity => entity.ID));
+                    Store = new ConcurrentDictionary<object, T>(entities.ToDictionary(entity => entity.Key));
                 }
             }
         }
@@ -65,7 +72,6 @@ namespace ElCazador.Web.DataStore
 
         private void OnChanged(object source, FileSystemEventArgs e)
         {
-            // Specify what is done when a file is changed, created, or deleted.
             var lastWriteTime = File.GetLastWriteTimeUtc(FullPath);
 
             if (lastWriteTime != LastCommit)
@@ -85,7 +91,7 @@ namespace ElCazador.Web.DataStore
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public T Get(Guid key)
+        public T Get(object key)
         {
             if (Store.TryGetValue(key, out T value))
             {
@@ -126,14 +132,14 @@ namespace ElCazador.Web.DataStore
 
         private async Task AddOrEditInternal(T entity)
         {
-            Store.AddOrUpdate(entity.ID, entity, (key, oldValue) => entity);
+            Store.AddOrUpdate(entity.Key, entity, (key, oldValue) => entity);
 
             await Commit();
         }
 
         private async Task DeleteInternal(T entity)
         {
-            var result = Store.TryRemove(entity.ID, out T value);
+            var result = Store.TryRemove(entity.Key, out T value);
 
             if (result == true)
             {
@@ -165,12 +171,13 @@ namespace ElCazador.Web.DataStore
 
         private string Serialize()
         {
-            return JsonConvert.SerializeObject(Store.Values, Formatting.None);
+
+            return JsonConvert.SerializeObject(Store.Values, Formatting.None, JsonSettings);
         }
 
         private IEnumerable<T> Deserialize(string content)
         {
-            return JsonConvert.DeserializeObject<List<T>>(content);
+            return JsonConvert.DeserializeObject<List<T>>(content, JsonSettings);
         }
     }
 }

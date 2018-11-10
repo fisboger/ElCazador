@@ -8,9 +8,9 @@ namespace ElCazador.Worker.Models
         public LogEntry()
         {
             Timestamp = DateTime.UtcNow;
-            ID = Guid.NewGuid();
+            Key = Guid.NewGuid();
         }
-        public Guid ID { get; set; }
+        public object Key { get; set; }
         public DateTime Timestamp { get; set; }
         public string Name { get; set; }
         public string Message { get; set; }

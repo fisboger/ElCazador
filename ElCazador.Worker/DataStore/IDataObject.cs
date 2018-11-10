@@ -6,7 +6,7 @@ namespace ElCazador.Worker.DataStore
 {
     public interface IDataObject
     {
-        Guid ID { get; }
+        object Key { get; }
         DateTime Timestamp { get; }
     }
 }

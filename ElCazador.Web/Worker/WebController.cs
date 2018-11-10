@@ -70,22 +70,29 @@ namespace ElCazador.Web.Worker
             Console.WriteLine("{0}: {1}", name, value);
 
             await Add(logEntry, LogHubActions);
-            
+
         }
 
         public async Task Add(string name, User user)
         {
-            Console.WriteLine("{0}: Got user {1}", name, user.Username);
+            var store = DataStore.Get<User>();
 
-            await Log("WebController", "User {0} added", user.Username);
+            if (store.Get(user.Key) != null)
+            {
+                await Log("WebController", "User {0} already exists", user.Username);
+            }
+            else
+            {
+                await Log("WebController", "User {0} added", user.Username);
 
-            await Add(user, UserHubActions);
+                await Add(user, UserHubActions);
+            }
         }
 
         public async Task Add(string name, Target target)
         {
             await Log("WebController", "Target {0} added", target.Hostname);
-            
+
             await Add(target, TargetHubActions);
         }
 

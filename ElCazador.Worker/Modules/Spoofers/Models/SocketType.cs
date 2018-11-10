@@ -6,7 +6,8 @@ namespace ElCazador.Worker.Modules.Spoofers.Models
 {
     internal class SocketType : IEquatable<SocketType>
     {
-        internal Sockets Name { get; set; }
+        internal string Name { get; set; }
+        internal Sockets Type { get; set; }
         internal ProtocolType ProtocolType { get; set; }
         internal int Port { get; set; }
         internal EndPoint IPEndPoint;

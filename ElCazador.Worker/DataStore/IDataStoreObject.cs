@@ -7,7 +7,7 @@ namespace ElCazador.Worker.DataStore
     public interface IDataStoreObject<T> where T : IDataObject
     {
         IEnumerable<T> All { get; }
-        T Get(Guid key);
+        T Get(object key);
         Task Add(T entity);
         Task Delete(T entity);
         Task Edit(T entity);

@@ -21,13 +21,15 @@ namespace ElCazador.Worker.Modules.Spoofers
         #region Sockets
         private Models.SocketType UDP137Socket = new Models.SocketType
         {
-            Name = Sockets.NBNS,
+            Name = "NBNS",
+            Type = Sockets.NBNS,
             ProtocolType = ProtocolType.Udp,
             Port = 137
         };
         private Models.SocketType UDP5355Socket = new Models.SocketType
         {
-            Name = Sockets.LLMNR,
+            Name = "LLMNR",
+            Type = Sockets.LLMNR,
             ProtocolType = ProtocolType.Udp,
             Port = 5355,
             MulticastAddress = IPAddress.Parse("224.0.0.252")

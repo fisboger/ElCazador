@@ -50,8 +50,7 @@ namespace ElCazador.Worker.Modules.Spoofers
             var name = GetName(state);
             
             // We have to write everything as once as this is threaded
-            await Controller.Log(Protocol, "{0}Received {1} request for {2} from {3}{4}",
-                 Environment.NewLine,
+            await Controller.Log(Protocol, "Received {0} request for {1} from {2}{3}",
                  Protocol,
                  name,
                  ((IPEndPoint)SocketType.IPEndPoint).Address.ToString(),

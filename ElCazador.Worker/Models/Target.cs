@@ -9,9 +9,8 @@ namespace ElCazador.Worker.Models
         public Target()
         {
             Timestamp = DateTime.UtcNow;
-            ID = Guid.NewGuid();
         }
-        public Guid ID { get; set; }
+        public object Key => Hostname;
         public string Hostname { get; set; }
         public string IP { get; set; }
         public bool Dumped { get; set; }

@@ -8,16 +8,17 @@ namespace ElCazador.Worker.Models
     {
         public User()
         {
-            ID = Guid.NewGuid();
             Timestamp = DateTime.UtcNow;
         }
 
-        public Guid ID { get; set; }
+        public object Key => Username;
         public DateTime Timestamp { get; set; }
         public string IPAddress { get; set; }
         public string Username { get; set; }
+        [JsonEncrypt]
         public string Hash { get; set; }
         public bool IsClearText { get; set; }
+        [JsonEncrypt]
         public string HashcatFormat { get; set; }
     }
 }

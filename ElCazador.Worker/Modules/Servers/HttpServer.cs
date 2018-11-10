@@ -137,7 +137,7 @@ namespace ElCazador.Worker.Modules.Servers
                     {
                         IPAddress = context.Request.RemoteEndPoint.Address.ToString(),
                         Username = user,
-                        Hash = string.Format("{0}:{1}", String.Concat(ntHash.Take(32)), string.Concat(ntHash.Skip(32))),
+                        Hash = "NetNTLMv2",
                         HashcatFormat = string.Format(
                             "{0}::{1}:{2}:{3}:{4}",
                             user,
