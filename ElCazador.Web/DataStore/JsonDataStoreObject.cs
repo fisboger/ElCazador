@@ -19,6 +19,9 @@ namespace ElCazador.Web.DataStore
         private string FileName => string.Format("{0}.json", Name);
         private string FullPath => string.Format("{0}/{1}", HostingEnvironment.ContentRootPath, FileName);
 
+        private DateTime LastCommit { get; set; }
+        private DateTime LastRead { get; set; }
+
         private IHostingEnvironment HostingEnvironment { get; set; }
         private ConcurrentDictionary<Guid, T> Store { get; set; }
 
@@ -30,6 +33,7 @@ namespace ElCazador.Web.DataStore
             HostingEnvironment = hostingEnvironment;
 
             Initialize();
+            StartWatcher();
         }
 
         private void Initialize()
@@ -38,6 +42,7 @@ namespace ElCazador.Web.DataStore
 
             if (File.Exists(FullPath))
             {
+                LastCommit = File.GetLastWriteTimeUtc(FullPath);
                 var content = File.ReadAllText(FullPath);
 
                 if (!string.IsNullOrWhiteSpace(content))
@@ -47,6 +52,28 @@ namespace ElCazador.Web.DataStore
                 }
             }
         }
+
+        private void StartWatcher()
+        {
+            var watcher = new FileSystemWatcher(Path.GetDirectoryName(FullPath), Path.GetFileName(FullPath));
+
+            watcher.Changed += new FileSystemEventHandler(OnChanged);
+            watcher.Deleted += new FileSystemEventHandler(OnChanged);
+
+            watcher.EnableRaisingEvents = true;
+        }
+
+        private void OnChanged(object source, FileSystemEventArgs e)
+        {
+            // Specify what is done when a file is changed, created, or deleted.
+            var lastWriteTime = File.GetLastWriteTimeUtc(FullPath);
+
+            if (lastWriteTime != LastCommit)
+            {
+                Initialize();
+            }
+        }
+
 
         /// <summary>
         /// Get all T entities
@@ -126,7 +153,9 @@ namespace ElCazador.Web.DataStore
 
             try
             {
-                await File.WriteAllTextAsync(FullPath, Serialize());
+                // We don't want this to be async, as then we don't get the right lastwritetime
+                File.WriteAllText(FullPath, Serialize());
+                LastCommit = File.GetLastWriteTimeUtc(FullPath);
             }
             finally
             {

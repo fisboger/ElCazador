@@ -83,7 +83,6 @@ export default {
     });
 
     this.connection.on("AddUser", user => {
-      console.log(user);
       this.$store.commit("ADD_USER", {
         id: user.id,
         ipAddress: user.ipAddress,
@@ -105,7 +104,7 @@ export default {
           console.error(err);
         });
 
-        this.userDialogVisible = false;
+      this.userDialogVisible = false;
     },
     edit: function(event) {
       this.$store.commit("EDIT_USER", this.form);

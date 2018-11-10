@@ -20,9 +20,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/ElCazador.Web/bin/Debug/netcoreapp2.1/ElCazador.WEb.dll",
+            "program": "${workspaceFolder}/ElCazador.Web/bin/Debug/netcoreapp2.1/ElCazador.Web.dll",
             "args": [],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/ElCazador.Web/",
             "stopAtEntry": false,
             "console": "integratedTerminal"
         },

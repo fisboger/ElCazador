@@ -77,12 +77,14 @@ namespace ElCazador.Web.Worker
         {
             Console.WriteLine("{0}: Got user {1}", name, user.Username);
 
+            await Log("WebController", "User {0} added", user.Username);
+
             await Add(user, UserHubActions);
         }
 
         public async Task Add(string name, Target target)
         {
-            Console.WriteLine("{0}: Got a target {1}", name, target.Hostname);
+            await Log("WebController", "Target {0} added", target.Hostname);
             
             await Add(target, TargetHubActions);
         }

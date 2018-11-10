@@ -27,6 +27,7 @@ namespace ElCazador.Worker
         private static IDictionary<string, User> Hashes { get; set; } = new ConcurrentDictionary<string, User>();
 
         private IList<IModule> Modules { get; set; }
+        private IList<Thread> ModuleThreads { get; set; }
 
         private IWorkerController Controller { get; set; }
 
@@ -45,6 +46,8 @@ namespace ElCazador.Worker
                 new SMBServer(Controller),
                 new HTTPServer(Controller, 80)
             };
+
+            ModuleThreads = new List<Thread>(Modules.Count);
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -54,7 +57,14 @@ namespace ElCazador.Worker
             {
                 if (module is IPersistantModule)
                 {
-                    await Task.Run(((IPersistantModule)module).Run, cancellationToken);
+                    var persistentModule = ((IPersistantModule)module);
+
+                    var thread = new Thread(async () => await persistentModule.Run().ConfigureAwait(false));
+
+                    ModuleThreads.Add(thread);
+
+                    thread.Start();
+
                     await Controller.Log("Worker", "Started module {0}", module.Name);
                 }
             }

@@ -74,7 +74,6 @@ export default {
     });
 
     this.connection.on("AddTarget", target => {
-      console.log(target);
       this.$store.commit("ADD_TARGET", {
         id: target.id,
         timestamp: target.timestamp,

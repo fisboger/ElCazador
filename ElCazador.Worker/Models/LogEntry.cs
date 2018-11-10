@@ -16,5 +16,11 @@ namespace ElCazador.Worker.Models
         public string Message { get; set; }
         public object[] Parameters { get; set; }
 
+        #region Computed properties
+        public string FormattedMessage => string.Format(Message, Parameters);
+
+        public string TimestampString => Timestamp.ToString("MM/dd/yyyy HH:mm:ss");
+        #endregion
+
     }
 }

@@ -15,6 +15,7 @@ namespace ElCazador.Web.DataStore
         public JsonDataStore(
             IHostingEnvironment hostingEnvironment)
         {
+            Console.WriteLine("NEW DATASTORE");
             HostingEnvironment = hostingEnvironment;
 
             Stores = new ConcurrentDictionary<Type, object>();
@@ -22,7 +23,22 @@ namespace ElCazador.Web.DataStore
 
         public IDataStoreObject<T> Get<T>() where T : IDataObject
         {
-            return (IDataStoreObject<T>)Stores.GetOrAdd(typeof(T), new JsonDataStoreObject<T>(HostingEnvironment));
+            var type = typeof(T);
+            var storeExists = Stores.ContainsKey(typeof(T));
+
+            if (!storeExists)
+            {
+                var store = new JsonDataStoreObject<T>(HostingEnvironment);
+                Stores.TryAdd(type, store);
+
+                return store;
+            }
+            else
+            {
+                Stores.TryGetValue(type, out object result);
+
+                return (IDataStoreObject<T>)result;
+            }
         }
     }
 }

@@ -15,7 +15,7 @@ namespace ElCazador.Web.Hubs.Actions
         }
         public async Task Add(LogEntry logEntry)
         {
-            await LogHubContext.Clients.All.SendAsync("AddLogEntry", logEntry.Name, string.Format(logEntry.Message, logEntry.Parameters));
+            await LogHubContext.Clients.All.SendAsync("AddLogEntry", logEntry);
         }
 
         public async Task Edit(LogEntry logEntry)

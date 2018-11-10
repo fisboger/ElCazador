@@ -21,13 +21,13 @@ namespace ElCazador.Worker.Modules.Spoofers
         #region Sockets
         private Models.SocketType UDP137Socket = new Models.SocketType
         {
-            Name = Sockets.UDP137,
+            Name = Sockets.NBNS,
             ProtocolType = ProtocolType.Udp,
             Port = 137
         };
         private Models.SocketType UDP5355Socket = new Models.SocketType
         {
-            Name = Sockets.UDP5355,
+            Name = Sockets.LLMNR,
             ProtocolType = ProtocolType.Udp,
             Port = 5355,
             MulticastAddress = IPAddress.Parse("224.0.0.252")
@@ -118,6 +118,7 @@ namespace ElCazador.Worker.Modules.Spoofers
             foreach (var socketType in SocketTypes)
             {
                 await StartSocket(socketType);
+                await Controller.Log(Name, "{0} spoofer started on {1}:{2}", socketType.Name, Controller.WorkerSettings.IP.ToString(), socketType.Port);
             }
 
             while (true)
