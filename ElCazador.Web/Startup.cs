@@ -42,6 +42,7 @@ namespace ElCazador.Web
             services.AddTransient<IHubActions<User>, UserHubActions>();
             services.AddTransient<IHubActions<LogEntry>, LogHubActions>();
 
+            services.AddSingleton<IWorkerSettings, WorkerSettings>();
             services.AddSingleton<IWorkerController, WebController>();
             services.AddSingleton<IDataStore, JsonDataStore>();
 

@@ -331,3 +331,4 @@ ASALocalRun/
 Target.json
 LogEntry.json
 User.json
+*.dmp

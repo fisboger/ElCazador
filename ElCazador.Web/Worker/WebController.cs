@@ -7,15 +7,13 @@ using ElCazador.Worker.DataStore;
 using ElCazador.Worker.Interfaces;
 using ElCazador.Worker.Models;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Configuration;
 
 namespace ElCazador.Web.Worker
 {
     public class WebController : IWorkerController
     {
-        public WorkerSettings WorkerSettings => new WorkerSettings
-        {
-            IP = IPAddress.Parse("10.64.13.98")
-        };
+        public IWorkerSettings WorkerSettings { get; set; }
 
         public IDataStore DataStore { get; set; }
         private IHubActions<Target> TargetHubActions { get; set; }
@@ -25,6 +23,7 @@ namespace ElCazador.Web.Worker
 
         public WebController(
             IDataStore dataStore,
+            IWorkerSettings workerSettings,
             IHubActions<Target> targetHubActions,
             IHubActions<User> userHubActions,
             IHubActions<LogEntry> logHubActions)
@@ -33,6 +32,8 @@ namespace ElCazador.Web.Worker
             TargetHubActions = targetHubActions;
             UserHubActions = userHubActions;
             LogHubActions = logHubActions;
+
+            WorkerSettings = workerSettings;
         }
 
         public async Task Add<T>(string name, T entity) where T : IDataObject

@@ -14,6 +14,7 @@ namespace ElCazador.Worker.Models
         public string Hostname { get; set; }
         public string IP { get; set; }
         public bool Dumped { get; set; }
+        public DateTime DumpedTimestamp { get; set; }
         public DateTime Timestamp { get; set; }
     }
 }

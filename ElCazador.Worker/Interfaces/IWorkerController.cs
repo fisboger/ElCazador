@@ -6,7 +6,7 @@ namespace ElCazador.Worker.Interfaces
 {
     public interface IWorkerController
     {
-        WorkerSettings WorkerSettings { get; }
+        IWorkerSettings WorkerSettings { get; }
         IDataStore DataStore { get; }
 
         Task Add<T>(string name, T entity) where T : IDataObject;
