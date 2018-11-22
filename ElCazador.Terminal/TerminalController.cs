@@ -11,7 +11,9 @@ namespace ElCazador.Terminal
     {
         public IDataStore DataStore => throw new System.NotImplementedException();
 
-        public WorkerSettings WorkerSettings { get; private set; }
+        public IWorkerSettings WorkerSettings { get; private set; }
+
+        // IWorkerSettings IWorkerController.WorkerSettings => throw new NotImplementedException();
 
         public TerminalController(WorkerSettings workerSettings)
         {

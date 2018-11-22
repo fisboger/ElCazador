@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using ElCazador.Web.Hubs.Actions;
+using ElCazador.Web.Hubs.Models;
 using ElCazador.Worker.Interfaces;
 using ElCazador.Worker.Models;
 using Microsoft.AspNetCore.SignalR;
@@ -35,15 +36,20 @@ namespace ElCazador.Web.Hubs
             }
         }
 
-
-        public async Task SendMessage(string user, string message)
-        {
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
-        }
-
         public async Task AddTarget(Target target)
         {
             await WorkerController.Add("TargetHub", target);
+        }
+
+        public async Task DumpTarget(DumpTarget dumpTarget)
+        {
+            var targetStore = DataStore.Get<Target>();
+            var userStore = DataStore.Get<User>();
+
+            var target = targetStore.Get(dumpTarget.TargetKey);
+            var user = userStore.Get(dumpTarget.UserKey);
+
+            await WorkerController.Dump(target, user);
         }
     }
 }

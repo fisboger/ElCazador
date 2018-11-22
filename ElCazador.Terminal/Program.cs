@@ -10,10 +10,10 @@ namespace ElCazador.Terminal
         static ElCazador.Worker.Worker Worker;
         static void Main(string[] args)
         {
-            Worker = new ElCazador.Worker.Worker(new TerminalController(new WorkerSettings
-            {
-                IP = IPAddress.Parse("10.64.13.98")
-            }));
+            // Worker = new ElCazador.Worker.Worker(new TerminalController(new WorkerSettings
+            // {
+            //     IP = IPAddress.Parse("10.64.13.98")
+            // }));
 
             Console.Out.Flush();
             Console.ReadLine();

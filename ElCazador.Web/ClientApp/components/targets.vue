@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- Add/Edit target -->
     <el-dialog title="Add target" :visible.sync="targetDialogVisible" width="20%">
       <el-form :model="form">
         <el-form-item label="Host" :label-width="formLabelWidth">
@@ -12,6 +13,26 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="targetDialogVisible = false">Cancel</el-button>
         <el-button type="primary" @click="(targetDialogAction == 'ADD') ? add() : edit()">Confirm</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- Dump target -->
+    <el-dialog title="Dump target" :visible.sync="dumpDialogVisible" width="20%">
+      <el-form :model="form">
+        <el-form-item label="Host" :label-width="formLabelWidth">
+          <el-input v-model="form.hostname" autocomplete="off" disabled></el-input>
+        </el-form-item>
+        <input type="hidden" v-model="form.targetKey" />
+        <el-form-item label="User" :label-width="formLabelWidth">
+          <el-select v-model="form.userKey" clearable placeholder="Select">
+            <el-option v-for="user in currentUsers.data" :key="user.key" :label="user.username" :value="user.key">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dumpDialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="dump()">Dump</el-button>
       </span>
     </el-dialog>
 
@@ -38,6 +59,11 @@
                 <el-button @click="prepareEdit(scope.$index)" class="zero-padding" type="text" icon="el-icon-edit" circle></el-button>
               </template>
             </el-table-column>
+            <el-table-column fixed="right" align="right" min-width="40">
+              <template slot-scope="scope">
+                <el-button @click="prepareDump(scope.$index)" class="zero-padding" type="text">Dump</el-button>
+              </template>
+            </el-table-column>
           </el-table>
         </template>
       </el-card>
@@ -52,6 +78,7 @@ export default {
   data: function() {
     return {
       targetDialogVisible: false,
+      dumpDialogVisible: false,
       targetDialogAction: "ADD",
       form: {},
       formLabelWidth: "120px"
@@ -59,7 +86,8 @@ export default {
   },
   computed: {
     ...mapState({
-      currentTargets: state => state.targets
+      currentTargets: state => state.targets,
+      currentUsers: state => state.users
     })
   },
   created: function() {
@@ -75,6 +103,7 @@ export default {
 
     this.connection.on("AddTarget", target => {
       this.$store.commit("ADD_TARGET", {
+        key: target.key,
         id: target.id,
         timestamp: target.timestamp,
         hostname: target.hostname,
@@ -115,14 +144,37 @@ export default {
       this.targetDialogAction = "EDIT";
       this.targetDialogVisible = true;
     },
-    
+
+    prepareDump: function(index) {
+      var element = this.currentTargets.data[index];
+      this.form = {
+        hostname: element.hostname,
+        targetKey: element.key,
+        userKey: ""
+      };
+
+      this.dumpDialogVisible = true;
+    },
+
     prepareAdd: function() {
-      this. form = {};
-    
+      this.form = {};
+
       this.targetDialogAction = "ADD";
       this.targetDialogVisible = true;
     },
-    send: function() {}
+    send: function() {},
+    dump: function() {
+      this.connection
+        .invoke("dumpTarget", {
+          userKey: this.form.userKey,
+          targetKey: this.form.targetKey
+        })
+        .catch(function(err) {
+          console.error(err);
+        });
+
+        this.dumpDialogVisible = false;
+    }
   }
 };
 </script>

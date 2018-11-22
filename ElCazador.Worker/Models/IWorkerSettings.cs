@@ -6,5 +6,6 @@ namespace ElCazador.Worker.Models
     {
         IPAddress IP { get; }
         string ImpacketExamplesPath { get; }
+        string DumpPath { get; }
     }
 }

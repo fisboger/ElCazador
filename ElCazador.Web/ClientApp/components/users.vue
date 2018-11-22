@@ -9,7 +9,7 @@
                     <el-input v-model="form.password" autocomplete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="Password type" :label-width="formLabelWidth">
-                    <el-select v-model="form.type" placeholder="Password type">
+                    <el-select v-model="form.passwordType" placeholder="Password type">
                         <el-option sel label="NTLM" value="ntlm"></el-option>
                         <el-option label="Clear-text" value="clearText"></el-option>
                     </el-select>
@@ -84,7 +84,7 @@ export default {
 
     this.connection.on("AddUser", user => {
       this.$store.commit("ADD_USER", {
-        id: user.id,
+        key: user.key,
         ipAddress: user.ipAddress,
         username: user.username,
         hash: user.hash,
@@ -98,7 +98,8 @@ export default {
       this.connection
         .invoke("AddUser", {
           username: this.form.username,
-          hash: this.form.password
+          hash: this.form.password,
+          passwordType: this.form.passwordType
         })
         .catch(function(err) {
           console.error(err);
@@ -115,7 +116,7 @@ export default {
     prepareEdit: function(index) {
       var element = this.currentUsers.data[index];
       this.form = {
-        id: element.id,
+        key: element.key,
         username: element.username,
         password: element.hash
       };

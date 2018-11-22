@@ -15,6 +15,7 @@ using ElCazador.Worker.Interfaces;
 using Microsoft.Extensions.Hosting;
 using ElCazador.Worker.Modules;
 using System.Diagnostics;
+using ElCazador.Worker.Modules.Tools;
 
 namespace ElCazador.Worker
 {
@@ -26,7 +27,7 @@ namespace ElCazador.Worker
       // private static Thread HTTPServerWork { get; set; }
         private static IDictionary<string, User> Hashes { get; set; } = new ConcurrentDictionary<string, User>();
 
-        private IList<IModule> Modules { get; set; }
+        private IDictionary<Type, IModule> Modules { get; set; }
         private IList<Thread> ModuleThreads { get; set; }
 
         private IWorkerController Controller { get; set; }
@@ -40,24 +41,35 @@ namespace ElCazador.Worker
 
         private void RegisterModules()
         {
-            Modules = new List<IModule>()
+            Modules = new Dictionary<Type, IModule>()
             {
-                new SpooferCore(Controller, new SpooferSettings()),
-                new SMBServer(Controller),
-                new HTTPServer(Controller, 80)
+                { typeof(SpooferCore), new SpooferCore(Controller, new SpooferSettings()) },
+                { typeof(SMBServer) , new SMBServer(Controller) },
+                { typeof(HTTPServer) , new HTTPServer(Controller, 80) },
+                { typeof(LsassDumpTool) , new LsassDumpTool(Controller) }
             };
 
             ModuleThreads = new List<Thread>(Modules.Count);
         }
 
+        public async Task RunTool(Type type, Target target, User user)
+        {
+            var module = Modules[type];
+
+            var toolModule = (IToolModule)module;
+
+            await Task.Run(() => toolModule.Run(target, user));
+        }
+
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await Controller.Log("Worker", "Starting modules");
+
             foreach (var module in Modules)
             {
-                if (module is IPersistantModule)
+                if (module.Value is IPersistantModule)
                 {
-                    var persistentModule = ((IPersistantModule)module);
+                    var persistentModule = ((IPersistantModule)module.Value);
 
                     var thread = new Thread(async () => await persistentModule.Run().ConfigureAwait(false));
 
@@ -65,7 +77,11 @@ namespace ElCazador.Worker
 
                     thread.Start();
 
-                    await Controller.Log("Worker", "Started module {0}", module.Name);
+                    await Controller.Log("Worker", "Started module {0}", module.Value.Name);
+                }
+                else if (module.Value is IToolModule)
+                {
+                    Controller.SynchronizeTool(module.Key, (IToolModule) module.Value);
                 }
             }
         }
@@ -73,7 +89,7 @@ namespace ElCazador.Worker
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             await Controller.Log("Worker", "Stopping modules");
-            foreach (var module in Modules)
+            foreach (var module in Modules.Values)
             {
                 if (module is IPersistantModule)
                 {

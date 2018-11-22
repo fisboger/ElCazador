@@ -42,12 +42,12 @@ namespace ElCazador.Worker.Modules.Servers
                 IPEndPoint localEndPoint = new IPEndPoint(Controller.WorkerSettings.IP, 445);
 
                 // Create a TCP/IP socket.  
-                Socket listener = new Socket(localEndPoint.Address.AddressFamily,
+                Socket = new Socket(localEndPoint.Address.AddressFamily,
                     SocketType.Stream, ProtocolType.Tcp);
 
                 // Bind the socket to the local endpoint and listen for incoming connections.  
-                listener.Bind(localEndPoint);
-                listener.Listen(100);
+                Socket.Bind(localEndPoint);
+                Socket.Listen(100);
 
                 while (true)
                 {
@@ -55,9 +55,9 @@ namespace ElCazador.Worker.Modules.Servers
                     mre.Reset();
 
                     // Start an asynchronous socket to listen for connections.  
-                    listener.BeginAccept(
+                    Socket.BeginAccept(
                         new AsyncCallback(async (ar) => await AcceptCallback(ar)),
-                        listener);
+                        Socket);
 
                     // Wait until a connection is made before continuing.  
                     mre.WaitOne();

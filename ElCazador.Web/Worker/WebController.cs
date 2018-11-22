@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using ElCazador.Web.Hubs;
@@ -6,6 +8,8 @@ using ElCazador.Web.Hubs.Actions;
 using ElCazador.Worker.DataStore;
 using ElCazador.Worker.Interfaces;
 using ElCazador.Worker.Models;
+using ElCazador.Worker.Modules;
+using ElCazador.Worker.Modules.Tools;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 
@@ -19,6 +23,7 @@ namespace ElCazador.Web.Worker
         private IHubActions<Target> TargetHubActions { get; set; }
         private IHubActions<User> UserHubActions { get; set; }
         private IHubActions<LogEntry> LogHubActions { get; set; }
+        private IDictionary<Type, IToolModule> Tools { get; set; }
 
 
         public WebController(
@@ -34,6 +39,8 @@ namespace ElCazador.Web.Worker
             LogHubActions = logHubActions;
 
             WorkerSettings = workerSettings;
+
+            Tools = new Dictionary<Type, IToolModule>();
         }
 
         public async Task Add<T>(string name, T entity) where T : IDataObject
@@ -65,16 +72,27 @@ namespace ElCazador.Web.Worker
             await Add(name, logEntry);
         }
 
-        public async Task Add(string name, LogEntry logEntry)
+        public async Task Dump(Target target, User user)
+        {
+            var tool = Tools[typeof(LsassDumpTool)];
+
+            await tool.Run(target, user);
+        }
+
+        public void SynchronizeTool(Type type, IToolModule tool)
+        {
+            Tools.Add(type, tool);
+        }
+
+        private async Task Add(string name, LogEntry logEntry)
         {
             var value = string.Format(logEntry.Message, logEntry.Parameters);
             Console.WriteLine("{0}: {1}", name, value);
 
             await Add(logEntry, LogHubActions);
-
         }
 
-        public async Task Add(string name, User user)
+        private async Task Add(string name, User user)
         {
             var store = DataStore.Get<User>();
 
@@ -90,7 +108,7 @@ namespace ElCazador.Web.Worker
             }
         }
 
-        public async Task Add(string name, Target target)
+        private async Task Add(string name, Target target)
         {
             await Log("WebController", "Target {0} added", target.Hostname);
 
