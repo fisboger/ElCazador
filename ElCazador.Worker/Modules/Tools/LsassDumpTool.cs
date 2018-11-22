@@ -77,6 +77,8 @@ namespace ElCazador.Worker.Modules.Tools
         {
             var result = await ProcessStarter.Start("python", getArguments(target, user, command));
 
+            await Controller.Log(Name, result.ResultOutput);
+
             if (result.HasErrors)
             {
                 await Controller.Log(Name, result.ResultOutput);

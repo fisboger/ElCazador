@@ -29,6 +29,10 @@ namespace ElCazador.Worker.Modules.Tools.Models
                 {
                     return true;
                 }
+                else if (ResultOutput.Contains("Errno Connection error"))
+                {
+                    return false;
+                }
 
                 return false;
             }
