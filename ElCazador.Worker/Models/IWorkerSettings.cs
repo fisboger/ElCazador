@@ -7,5 +7,8 @@ namespace ElCazador.Worker.Models
         IPAddress IP { get; }
         string ImpacketExamplesPath { get; }
         string DumpPath { get; }
+        string PythonExecutable { get; }
+        string MimikatzExecutable { get; }
+        string ProcdumpExecutable { get; }
     }
 }
