@@ -31,7 +31,11 @@ namespace ElCazador.Worker.Modules.Tools.Models
                 }
                 else if (ResultOutput.Contains("Errno Connection error"))
                 {
-                    return false;
+                    return true;
+                }
+                else if (ResultOutput.Contains("rpc_s_access_denied"))
+                {
+                    return true;
                 }
 
                 return false;

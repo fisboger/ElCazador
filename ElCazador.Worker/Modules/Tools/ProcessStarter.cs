@@ -11,7 +11,7 @@ namespace ElCazador.Worker.Modules.Tools
         public static async Task<ProcessResult> Start(string filename, string arguments)
         {
             var startInfo = new ProcessStartInfo();
-            startInfo.FileName = "python";
+            startInfo.FileName = filename;
             startInfo.Arguments = arguments;
 
             startInfo.UseShellExecute = false;
@@ -23,9 +23,8 @@ namespace ElCazador.Worker.Modules.Tools
             {
                 using (StreamReader reader = process.StandardOutput)
                 {
-                    string errorOutput = await process.StandardError.ReadToEndAsync();
-                    string resultOutput = await reader.ReadToEndAsync();
-
+                    // string errorOutput = await process.StandardError.ReadToEndAsync().ConfigureAwait(false);
+                    string resultOutput = await reader.ReadToEndAsync().ConfigureAwait(false);
 
                     return new ProcessResult()
                     {
