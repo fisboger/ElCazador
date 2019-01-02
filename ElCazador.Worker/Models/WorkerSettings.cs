@@ -13,7 +13,13 @@ namespace ElCazador.Worker.Models
         }
 
         public IPAddress IP => IPAddress.Parse(Configuration.GetValue<string>("ElCazador:IPAddress"));
+
+        #region Paths
         public string ImpacketExamplesPath => Configuration.GetValue<string>("ElCazador:ImpacketExamplesPath");
         public string DumpPath => Configuration.GetValue<string>("ElCazador:DumpPath");
+        public string PythonExecutable => Configuration.GetValue<string>("ElCazador:PythonExecutable");
+        public string MimikatzExecutable => Configuration.GetValue<string>("ElCazador:MimikatzExecutable");
+        public string ProcdumpExecutable => Configuration.GetValue<string>("ElCazaodr:ProcdumpExecutable");
+        #endregion
     }
 }

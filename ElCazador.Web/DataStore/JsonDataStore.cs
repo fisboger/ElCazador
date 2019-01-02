@@ -28,6 +28,7 @@ namespace ElCazador.Web.DataStore
 
             if (!storeExists)
             {
+                Console.WriteLine("New {0} store", type.Name);
                 var store = new JsonDataStoreObject<T>(HostingEnvironment);
                 Stores.TryAdd(type, store);
 

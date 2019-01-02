@@ -21,6 +21,7 @@ namespace ElCazador.Web.DataStore
 
         private DateTime LastCommit { get; set; }
         private DateTime LastRead { get; set; }
+        private FileSystemWatcher Watcher { get; set; }
 
         private IHostingEnvironment HostingEnvironment { get; set; }
         private ConcurrentDictionary<object, T> Store { get; set; }
@@ -62,19 +63,23 @@ namespace ElCazador.Web.DataStore
 
         private void StartWatcher()
         {
-            var watcher = new FileSystemWatcher(Path.GetDirectoryName(FullPath), Path.GetFileName(FullPath));
+            Watcher = new FileSystemWatcher(Path.GetDirectoryName(FullPath), Path.GetFileName(FullPath));
 
-            watcher.Changed += new FileSystemEventHandler(OnChanged);
-            watcher.Deleted += new FileSystemEventHandler(OnChanged);
+            Watcher.Changed += new FileSystemEventHandler(OnChanged);
+            Watcher.Deleted += new FileSystemEventHandler(OnChanged);
 
-            watcher.EnableRaisingEvents = true;
+            Watcher.NotifyFilter = NotifyFilters.LastWrite;
+
+            Watcher.EnableRaisingEvents = true;
         }
 
         private void OnChanged(object source, FileSystemEventArgs e)
         {
             var lastWriteTime = File.GetLastWriteTimeUtc(FullPath);
 
-            if (lastWriteTime != LastCommit)
+            var lol = (lastWriteTime - LastCommit).TotalSeconds;
+
+            if (lol > 1)
             {
                 Initialize();
             }
@@ -156,6 +161,7 @@ namespace ElCazador.Web.DataStore
         private async Task Commit()
         {
             await Semaphore.WaitAsync();
+            Watcher.EnableRaisingEvents = false;
 
             try
             {
@@ -166,7 +172,9 @@ namespace ElCazador.Web.DataStore
             finally
             {
                 Semaphore.Release();
+                Watcher.EnableRaisingEvents = true;
             }
+
         }
 
         private string Serialize()
