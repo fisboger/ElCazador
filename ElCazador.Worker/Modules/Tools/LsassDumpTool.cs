@@ -8,7 +8,7 @@ using ElCazador.Worker.Modules.Tools.Models;
 
 namespace ElCazador.Worker.Modules.Tools
 {
-    public class LsassDumpTool : AbstractModule, IToolModule
+    public class LsassDumpTool : BaseModule, IToolModule
     {
         public LsassDumpTool(IWorkerController controller) : base(controller, "LsassDumpTool")
         {

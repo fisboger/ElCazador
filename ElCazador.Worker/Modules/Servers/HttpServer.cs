@@ -14,7 +14,7 @@ using ElCazador.Worker.Interfaces;
 
 namespace ElCazador.Worker.Modules.Servers
 {
-    internal class HTTPServer : AbstractModule, IPersistantModule
+    internal class HTTPServer : BaseModule, IPersistantModule
     {
         private HttpListener Listener { get; set; }
         private int Port { get; set; }
