@@ -13,7 +13,7 @@ using ElCazador.Worker.Modules.Spoofers.Models;
 
 namespace ElCazador.Worker.Modules.Spoofers
 {
-    internal class SpooferCore : BaseModule, IPersistantModule
+    internal class SpooferCore : BaseModule, IPersistentModule
     {
         private SpooferSettings Settings { get; set; }
 

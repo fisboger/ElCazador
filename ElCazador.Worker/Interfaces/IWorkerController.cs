@@ -16,6 +16,6 @@ namespace ElCazador.Worker.Interfaces
         Task Add<T>(string name, T entity) where T : IDataObject;
         Task Log(string name, string value, params object[] args);
         Task Dump(Target target, User user);
-        void SynchronizeTool(Type type, IToolModule tool);
+        void SynchronizeTool(Type type, IActionModule tool);
     }
 }

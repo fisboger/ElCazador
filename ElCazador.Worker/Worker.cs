@@ -56,7 +56,7 @@ namespace ElCazador.Worker
         {
             var module = Modules[type];
 
-            var toolModule = (IToolModule)module;
+            var toolModule = (IActionModule)module;
 
             await Task.Run(() => toolModule.Run(target, user));
         }
@@ -67,9 +67,9 @@ namespace ElCazador.Worker
 
             foreach (var module in Modules)
             {
-                if (module.Value is IPersistantModule)
+                if (module.Value is IPersistentModule)
                 {
-                    var persistentModule = ((IPersistantModule)module.Value);
+                    var persistentModule = ((IPersistentModule)module.Value);
 
                     var thread = new Thread(async () => await persistentModule.Run().ConfigureAwait(false));
 
@@ -79,9 +79,9 @@ namespace ElCazador.Worker
 
                     await Controller.Log("Worker", "Started module {0}", module.Value.Name);
                 }
-                else if (module.Value is IToolModule)
+                else if (module.Value is IActionModule)
                 {
-                    Controller.SynchronizeTool(module.Key, (IToolModule) module.Value);
+                    Controller.SynchronizeTool(module.Key, (IActionModule) module.Value);
                 }
             }
         }
@@ -91,9 +91,9 @@ namespace ElCazador.Worker
             await Controller.Log("Worker", "Stopping modules");
             foreach (var module in Modules.Values)
             {
-                if (module is IPersistantModule)
+                if (module is IPersistentModule)
                 {
-                    await ((IPersistantModule)module).Stop();
+                    await ((IPersistentModule)module).Stop();
                     await Controller.Log("Worker", "Stopped module {0}", module.Name);
                 }
             }

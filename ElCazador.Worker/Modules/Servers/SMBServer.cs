@@ -12,7 +12,7 @@ using ElCazador.Worker.Utils;
 
 namespace ElCazador.Worker.Modules.Servers
 {
-    internal class SMBServer : BaseModule, IPersistantModule
+    internal class SMBServer : BaseModule, IPersistentModule
     {
         private static ManualResetEvent mre = new ManualResetEvent(false);
         private Socket Socket { get; set; }

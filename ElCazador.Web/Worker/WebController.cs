@@ -23,7 +23,7 @@ namespace ElCazador.Web.Worker
         private IHubActions<Target> TargetHubActions { get; set; }
         private IHubActions<User> UserHubActions { get; set; }
         private IHubActions<LogEntry> LogHubActions { get; set; }
-        private IDictionary<Type, IToolModule> Tools { get; set; }
+        private IDictionary<Type, IActionModule> Tools { get; set; }
 
 
         public WebController(
@@ -40,7 +40,7 @@ namespace ElCazador.Web.Worker
 
             WorkerSettings = workerSettings;
 
-            Tools = new Dictionary<Type, IToolModule>();
+            Tools = new Dictionary<Type, IActionModule>();
         }
 
         public async Task Add<T>(string name, T entity) where T : IDataObject
@@ -79,7 +79,7 @@ namespace ElCazador.Web.Worker
             await tool.Run(target, user);
         }
 
-        public void SynchronizeTool(Type type, IToolModule tool)
+        public void SynchronizeTool(Type type, IActionModule tool)
         {
             Tools.Add(type, tool);
         }

@@ -3,7 +3,7 @@ using ElCazador.Worker.Models;
 
 namespace ElCazador.Worker.Modules
 {
-    public interface IToolModule : IModule
+    public interface IActionModule : IModule
     {
         Task Run(Target target, User user);
     }
