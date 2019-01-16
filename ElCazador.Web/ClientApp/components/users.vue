@@ -2,6 +2,9 @@
     <div>
         <el-dialog title="Add user" :visible.sync="userDialogVisible" width="20%">
             <el-form :model="form">
+              <el-form-item label="Domain" :label-width="formLabelWidth">
+                    <el-input v-model="form.domain" autocomplete="off"></el-input>
+                </el-form-item>
                 <el-form-item label="Username" :label-width="formLabelWidth">
                     <el-input v-model="form.username" autocomplete="off"></el-input>
                 </el-form-item>
@@ -21,10 +24,24 @@
             </span>
         </el-dialog>
 
+        <el-dialog title="Hashes" :visible.sync="hashesDialogVisible" width="20%">
+            <el-form :model="form">
+                <el-input
+                type="textarea"
+                :rows="6"
+                v-model="hashes">
+              </el-input>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="hashesDialogVisible = false">Close</el-button>
+            </span>
+        </el-dialog>
+
         <el-col :span="12" class="spaced-col">
             <el-card class="box-card">
                 <div slot="header" class="clearfix">
                     <span>Users</span>
+                    <el-button @click="dumpHashes()" type="primary" size="mini">Dump hashes</el-button>
                     <el-button style="float: right;" @click="prepareAdd()" type="primary" icon="el-icon-plus" size="mini" circle></el-button>
                 </div>
                 <template>
@@ -61,9 +78,11 @@ export default {
   data() {
     return {
       userDialogVisible: false,
+      hashesDialogVisible: false,
       userDialogAction: "ADD",
       form: {},
-      formLabelWidth: "120px"
+      formLabelWidth: "120px",
+      hashes: ""
     };
   },
   computed: {
@@ -85,6 +104,7 @@ export default {
     this.connection.on("AddUser", user => {
       this.$store.commit("ADD_USER", {
         key: user.key,
+        domain: user.domain,
         ipAddress: user.ipAddress,
         username: user.username,
         hash: user.hash,
@@ -99,6 +119,7 @@ export default {
         .invoke("AddUser", {
           username: this.form.username,
           hash: this.form.password,
+          domain: this.form.domain,
           passwordType: this.form.passwordType
         })
         .catch(function(err) {
@@ -129,6 +150,16 @@ export default {
 
       this.userDialogAction = "ADD";
       this.userDialogVisible = true;
+    },
+    dumpHashes: function() {
+      this.hashes = "";
+      this.currentUsers.data.forEach(function(user) {
+        if(user.hashcatFormat != null && user.hashcatFormat != "") {
+          this.hashes += user.hashcatFormat + "\n";
+        }
+      });
+
+      this.hashesDialogVisible = true;
     }
   }
 };

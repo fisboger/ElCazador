@@ -37,7 +37,7 @@ namespace ElCazador.Web.DataStore
 
             JsonSettings = new JsonSerializerSettings
             {
-                ContractResolver = new EncryptedStringPropertyResolver("AWESOMEPASSWORD")
+                ContractResolver = new EncryptedStringPropertyResolver("kkrjYGSRIvvTyvDTxX@ng8F*F6K@4N4Rjo9GsRRPR8QwYm2ppwUyTmYbocnoy9vu")
             };
 
             Initialize();
