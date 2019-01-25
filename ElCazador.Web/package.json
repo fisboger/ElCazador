@@ -8,7 +8,7 @@
     "install": "webpack --config webpack.config.vendor.js"
   },
   "dependencies": {
-    "@aspnet/signalr": "^1.0.3",
+    "@aspnet/signalr": "^1.0.0",
     "axios": "^0.15.3",
     "core-js": "^2.4.1",
     "element-ui": "^2.4.7",
